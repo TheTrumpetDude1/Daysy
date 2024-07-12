@@ -1,0 +1,6 @@
+.DS_Store
+
+DaysyTests/
+DaysyUITests/
+
+PrivateKeys.swift
