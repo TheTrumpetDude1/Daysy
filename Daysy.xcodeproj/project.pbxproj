@@ -58,7 +58,6 @@
 		D4EEDD1D2BD98D8A008114D5 /* LoadingFiveLinesChronological.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EEDD062BD98D8A008114D5 /* LoadingFiveLinesChronological.swift */; };
 		D4EEDD1E2BD98D8A008114D5 /* LoadingFiveLinesPulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EEDD072BD98D8A008114D5 /* LoadingFiveLinesPulse.swift */; };
 		D4EEDD1F2BD98D8A008114D5 /* LoadingFiveLinesWave.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EEDD082BD98D8A008114D5 /* LoadingFiveLinesWave.swift */; };
-		D4EEDD202BD98D8A008114D5 /* LoadingHeart.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EEDD092BD98D8A008114D5 /* LoadingHeart.swift */; };
 		D4EEDD212BD98D8A008114D5 /* LoadingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EEDD0A2BD98D8A008114D5 /* LoadingIndicator.swift */; };
 		D4EEDD222BD98D8A008114D5 /* LoadingPulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EEDD0B2BD98D8A008114D5 /* LoadingPulse.swift */; };
 		D4EEDD232BD98D8A008114D5 /* LoadingPulseOutline.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EEDD0C2BD98D8A008114D5 /* LoadingPulseOutline.swift */; };
@@ -150,7 +149,6 @@
 		D4EEDD062BD98D8A008114D5 /* LoadingFiveLinesChronological.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingFiveLinesChronological.swift; sourceTree = "<group>"; };
 		D4EEDD072BD98D8A008114D5 /* LoadingFiveLinesPulse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingFiveLinesPulse.swift; sourceTree = "<group>"; };
 		D4EEDD082BD98D8A008114D5 /* LoadingFiveLinesWave.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingFiveLinesWave.swift; sourceTree = "<group>"; };
-		D4EEDD092BD98D8A008114D5 /* LoadingHeart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingHeart.swift; sourceTree = "<group>"; };
 		D4EEDD0A2BD98D8A008114D5 /* LoadingIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingIndicator.swift; sourceTree = "<group>"; };
 		D4EEDD0B2BD98D8A008114D5 /* LoadingPulse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingPulse.swift; sourceTree = "<group>"; };
 		D4EEDD0C2BD98D8A008114D5 /* LoadingPulseOutline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingPulseOutline.swift; sourceTree = "<group>"; };
@@ -316,7 +314,6 @@
 				D4EEDD062BD98D8A008114D5 /* LoadingFiveLinesChronological.swift */,
 				D4EEDD072BD98D8A008114D5 /* LoadingFiveLinesPulse.swift */,
 				D4EEDD082BD98D8A008114D5 /* LoadingFiveLinesWave.swift */,
-				D4EEDD092BD98D8A008114D5 /* LoadingHeart.swift */,
 				D4EEDD0B2BD98D8A008114D5 /* LoadingPulse.swift */,
 				D4EEDD0C2BD98D8A008114D5 /* LoadingPulseOutline.swift */,
 				D4EEDD0D2BD98D8A008114D5 /* LoadingPulseOutlineRepeater.swift */,
@@ -524,7 +521,6 @@
 				D41543F52C1774A300230F39 /* ImpulseBarView.swift in Sources */,
 				D4EEDD212BD98D8A008114D5 /* LoadingIndicator.swift in Sources */,
 				D41543F82C1774A300230F39 /* CircleView.swift in Sources */,
-				D4EEDD202BD98D8A008114D5 /* LoadingHeart.swift in Sources */,
 				D4EEDD152BD98D8A008114D5 /* LoadingBarStripes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

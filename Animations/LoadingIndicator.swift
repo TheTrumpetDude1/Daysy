@@ -49,7 +49,6 @@ public struct LoadingIndicator: View {
         case .bar: return AnyView(LoadingBar(color: color, size: size, speed: speed))
         case .barStripes: return AnyView(LoadingBarStripes(color: color, size: size, speed: speed))
         case .text: return AnyView(LoadingText(color: color, size: size, speed: speed))
-        case .heart: return AnyView(LoadingHeart(color: color, size: size, speed: speed))
         }
     }
 
@@ -75,7 +74,6 @@ public struct LoadingIndicator: View {
         case bar
         case barStripes
         case text
-        case heart
     }
     
     public enum Speed: Double, CaseIterable {

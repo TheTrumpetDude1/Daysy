@@ -33,6 +33,7 @@ struct CreateIconView: View {
     @State var cameraPermission = false
     @State var showImageMenu = false
     @State var isLoading = false
+    @State var isGenerating = false
     @State var showSymbols = false
     @State var selectedColor: Color = .black
     @State var searchText = ""
@@ -67,7 +68,26 @@ struct CreateIconView: View {
                                                 .foregroundStyle(.purple)
                                                 .opacity(0.25)
                                                 .padding()
-                                            LoadingIndicator(color: .white, size: .extraLarge)
+                                            VStack {
+                                                LoadingIndicator(color: .white, size: .extraLarge)
+                                                    .animation(.snappy, value: true)
+                                                if isGenerating {
+                                                    Button(action: {
+                                                        task?.cancel()
+                                                        withAnimation(.spring) {
+                                                            isGenerating = false
+                                                            isLoading = false
+                                                        }
+                                                    }) {
+                                                        Text("\(Image(systemName: "xmark")) Stop Generating")
+                                                            .minimumScaleFactor(0.1)
+                                                            .lineLimit(1)
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                            .foregroundStyle(.white)
+                                                            .padding()
+                                                    }
+                                                }
+                                            }
                                         }
                                     } else {
                                         TabView {
@@ -144,12 +164,16 @@ struct CreateIconView: View {
                                             if aiOn  && isConnectedToInternet() {
                                                 Button(action: {
                                                     withAnimation(.snappy) {
+                                                        isGenerating = true
                                                         isLoading = true
                                                     }
                                                     task = Task {
-                                                        selectedCustomImage = await fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText)
-                                                        withAnimation(.snappy) {
-                                                            isLoading.toggle()
+                                                        fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
+                                                            withAnimation(.snappy) {
+                                                                selectedCustomImage = image
+                                                                isLoading = false
+                                                                isGenerating = false
+                                                            }
                                                         }
                                                     }
                                                 }) {
@@ -160,6 +184,7 @@ struct CreateIconView: View {
                                                             .symbolRenderingMode(.hierarchical)
                                                         
                                                         Text("Generate Image")
+                                                            .lineLimit(1)
                                                             .font(.system(size: 20, weight: .semibold, design: .rounded))
                                                     }
                                                     .foregroundStyle(.purple)
@@ -185,7 +210,23 @@ struct CreateIconView: View {
                                                     .padding()
                                                 VStack {
                                                     LoadingIndicator(color: .white, size: .extraLarge)
-                                                        .font(.system(size: horizontalSizeClass == .compact ? 20 : 30, weight: .bold, design: .rounded))
+                                                        .animation(.snappy, value: true)
+                                                    if isGenerating {
+                                                        Button(action: {
+                                                            task?.cancel()
+                                                            withAnimation(.spring) {
+                                                                isGenerating = false
+                                                                isLoading = false
+                                                            }
+                                                        }) {
+                                                            Text("\(Image(systemName: "xmark")) Stop Generating")
+                                                                .minimumScaleFactor(0.1)
+                                                                .lineLimit(1)
+                                                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                                .foregroundStyle(.white)
+                                                                .padding()
+                                                        }
+                                                    }
                                                 }
                                             }
                                         } else {
@@ -287,16 +328,20 @@ struct CreateIconView: View {
                                         
                                         if aiOn  && isConnectedToInternet() {
                                             Button(action: {
-                                                    withAnimation(.snappy) {
-                                                        isLoading = true
-                                                    }
-                                                    task = Task {
-                                                        selectedCustomImage = await fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText)
+                                                showImageMenu = false
+                                                withAnimation(.snappy) {
+                                                    isGenerating = true
+                                                    isLoading = true
+                                                }
+                                                task = Task {
+                                                    fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
                                                         withAnimation(.snappy) {
-                                                            isLoading.toggle()
+                                                            selectedCustomImage = image
+                                                            isLoading = false
+                                                            isGenerating = false
                                                         }
                                                     }
-                                                showImageMenu = false
+                                                }
                                             }) {
                                                 VStack {
                                                     Text("\(Image(systemName:"wand.and.stars"))")
@@ -428,16 +473,20 @@ struct CreateIconView: View {
                                         
                                         if aiOn  && isConnectedToInternet() {
                                             Button(action: {
-                                                    withAnimation(.snappy) {
-                                                        isLoading = true
-                                                    }
-                                                    task = Task {
-                                                        selectedCustomImage = await fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText)
+                                                showImageMenu = false
+                                                withAnimation(.snappy) {
+                                                    isGenerating = true
+                                                    isLoading = true
+                                                }
+                                                task = Task {
+                                                    fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
                                                         withAnimation(.snappy) {
-                                                            isLoading.toggle()
+                                                            selectedCustomImage = image
+                                                            isLoading = false
+                                                            isGenerating = false
                                                         }
                                                     }
-                                                showImageMenu = false
+                                                }
                                             }) {
                                                 VStack {
                                                     Text("\(Image(systemName:"wand.and.stars"))")
@@ -516,7 +565,6 @@ struct CreateIconView: View {
                                     .font(.system(size: horizontalSizeClass == .compact ? ((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? 30 : 50) : ((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? 75 : 135), weight: .semibold,  design: .rounded))
                                     .foregroundStyle(currCustomIconText.isEmpty ? .gray : .clear)
                                 TextField("Label", text: $currCustomIconText, onEditingChanged: { editing in
-                                    if editing == true && !currCustomIconText.isEmpty { customizedText = true }
                                     withAnimation(.snappy) {
                                         isCustomTextFieldActive = editing
                                     }
@@ -655,6 +703,7 @@ struct CreateIconView: View {
                     }
                     .padding(horizontalSizeClass == .compact ? 0 : 5)
                 }
+                /*
                 if !currCustomIconText.isEmpty && !isCustomTextFieldActive {
                     Button(action: {
                         withAnimation(.snappy) {
@@ -667,14 +716,21 @@ struct CreateIconView: View {
                             .foregroundStyle(.red)
                     }
                     .padding(horizontalSizeClass == .compact ? 0 : 5)
-                }
+                } */
             }
             .ignoresSafeArea(.keyboard)
         }
+        .onChange(of: isCustomTextFieldActive, perform: { _ in
+            if isCustomTextFieldActive && !currCustomIconText.isEmpty {
+                customizedText = true
+            }
+        })
         .onChange(of: selectedCustomImage, perform: { _ in
             if !customizedText && selectedCustomImage != nil {
                 Task {
-                    currCustomIconText = await labelImage(input: selectedCustomImage!)
+                    withAnimation(.snappy) {
+                        currCustomIconText = await labelImage(input: selectedCustomImage!)
+                    }
                 }
             }
         })

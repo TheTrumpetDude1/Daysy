@@ -1410,24 +1410,24 @@ func hapticFeedback(type: Int = 2, impactStyle: UIImpactFeedbackGenerator.Feedba
     }
 }
 
-func fetchCustomImage(queryText: String) async -> UIImage? {
+func fetchCustomImage(queryText: String, completion: @escaping (UIImage?) -> Void) {
     let query = ImagesQuery(prompt: queryText, n: 1, size: ImagesQuery.Size._1024)
     
-    // Await the images query
-    await imageStore.images(query: query)
-    
-    // Check if there are images in the store
-    guard imageStore.images.count > 0,
-          let urlString = imageStore.images[0].url,
-          !urlString.isEmpty,
-          let url = URL(string: urlString) else {
-        return nil
-    }
-
-    // Attempt to download the image
-    do {
+    // Fetch images query asynchronously
+    Task {
+        await imageStore.images(query: query)
+        
+        // Check if there are images in the store
+        guard imageStore.images.count > 0,
+              let urlString = imageStore.images[0].url,
+              !urlString.isEmpty,
+              let url = URL(string: urlString) else {
+            completion(nil)
+            return
+        }
+        
         let image = await downloadImage(from: url)
-        return image
+        completion(image)
     }
 }
 
