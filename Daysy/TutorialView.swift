@@ -65,7 +65,7 @@ struct WelcomeView: View { //main welcome page
                                 Text("\(Image(systemName: "newspaper"))")
                                     .font(.system(size: 40, weight: .medium, design: .rounded))
                                     .symbolRenderingMode(.hierarchical)
-                                    .foregroundStyle(.purple)
+                                    .foregroundStyle(Color.accentColor)
                             }
                             VStack(alignment: .leading) {
                                 Text("Sheets")
@@ -113,7 +113,7 @@ struct WelcomeView: View { //main welcome page
                             .foregroundStyle(.white)
                             .padding(horizontalSizeClass == .compact ? 20 : 30)
                             .padding([.leading, .trailing])
-                            .background(.purple)
+                            .background(Color.accentColor)
                             .cornerRadius(horizontalSizeClass == .compact ? 15 : 30)
                             .symbolRenderingMode(.hierarchical)
                     }
@@ -166,7 +166,7 @@ struct GetStartedView: View {
                         .resizable()
                         .frame(width: horizontalSizeClass == .compact ? 85 : 115, height: horizontalSizeClass == .compact ? 75 : 100)
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(.orange, .purple.opacity(0.5))
+                        .foregroundStyle(.orange, Color.accentColor.opacity(0.5))
                     VStack {
                         Text("Learn the basics,")
                             .lineLimit(1)
@@ -199,7 +199,7 @@ struct GetStartedView: View {
                         }
                         .foregroundStyle(.white)
                         .padding([.top, .bottom], horizontalSizeClass == .compact ? 10 : 20)
-                        .background(Color.purple)
+                        .background(Color.accentColor)
                         .cornerRadius(horizontalSizeClass == .compact ? 20 : 30)
                         .padding([.leading, .trailing])
                     }
@@ -424,7 +424,7 @@ struct TappedIconView: View {
                     Image(systemName: "play.square.fill")
                         .resizable()
                         .frame(width: horizontalSizeClass == .compact ? 50 : 100, height: horizontalSizeClass == .compact ? 50 : 100)
-                        .foregroundStyle(.purple)
+                        .foregroundStyle(Color.accentColor)
                         .symbolRenderingMode(.hierarchical)
                         .padding(.leading, 5)
                 }
@@ -462,12 +462,12 @@ struct TappedIconView: View {
                     Text("\(Image(systemName: "arrow.up"))")
                         .minimumScaleFactor(0.01)
                         .font(.system(size: horizontalSizeClass == .compact ? 30 : 40, weight: .bold, design: .rounded))
-                        .foregroundStyle(.purple)
+                        .foregroundStyle(Color.accentColor)
                     Text("Speak your Tapped Icons")
                         .minimumScaleFactor(0.01)
                         .multilineTextAlignment(.leading)
                         .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
-                        .foregroundStyle(.purple)
+                        .foregroundStyle(Color.accentColor)
                 }
                 Spacer()
                 VStack(alignment: .trailing) {
@@ -497,11 +497,21 @@ struct ButtonView: View {
     var body: some View {
         ZStack {
             if !openMenu {
-                Text("Everything else you might need is in the bottom right corner. Tap it to learn more!")
-                    .minimumScaleFactor(0.01)
-                    .multilineTextAlignment(.center)
-                    .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
-                    .padding()
+                VStack {
+                    Spacer()
+                    Spacer()
+                    Text("Everything else you might need is in the bottom right corner. Tap it to learn more!")
+                        .minimumScaleFactor(0.01)
+                        .multilineTextAlignment(.center)
+                        .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
+                    Spacer()
+                    Text("\(Image(systemName: "arrow.down.forward"))")
+                        .minimumScaleFactor(0.1)
+                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(.systemGray4))
+                    Spacer()
+                }
+                .padding()
             }
             VStack {
                 Spacer()
@@ -520,7 +530,7 @@ struct ButtonView: View {
                             }
                         }
                         .foregroundStyle(.gray)
-                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 65 : 75)
+                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 70 : 75)
                         
                         HStack {
                             Spacer()
@@ -534,7 +544,7 @@ struct ButtonView: View {
                             }
                         }
                         .foregroundStyle(.gray)
-                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 65 : 75)
+                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 70 : 75)
                         
                         HStack {
                             Spacer()
@@ -548,7 +558,7 @@ struct ButtonView: View {
                             }
                         }
                         .foregroundStyle(.cyan)
-                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 65 : 75)
+                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 70 : 75)
                         
                         HStack {
                             Spacer()
@@ -562,7 +572,7 @@ struct ButtonView: View {
                             }
                         }
                         .foregroundStyle(.green)
-                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 65 : 75)
+                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 70 : 75)
                         
                         HStack {
                             Spacer()
@@ -576,7 +586,7 @@ struct ButtonView: View {
                             }
                         }
                         .foregroundStyle(.blue)
-                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 65 : 75)
+                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 70 : 75)
                         
                         HStack {
                             Spacer()
@@ -590,7 +600,7 @@ struct ButtonView: View {
                             }
                         }
                         .foregroundStyle(.gray)
-                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 65 : 75)
+                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 70 : 75)
                         
                         HStack {
                             Spacer()
@@ -603,8 +613,8 @@ struct ButtonView: View {
                                     .multilineTextAlignment(.trailing)
                             }
                         }
-                        .foregroundStyle(.purple)
-                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 65 : 75)
+                        .foregroundStyle(Color.accentColor)
+                        .frame(width: horizontalSizeClass == .compact ? 200 : 500, height: horizontalSizeClass == .compact ? 70 : 75)
                         
                     }.opacity(openMenu ? 1.0 : 0.0)
                     if openMenu {
@@ -714,7 +724,7 @@ struct ButtonView: View {
                                             Image(systemName: "square.fill")
                                                 .resizable()
                                                 .frame(width: 65, height: 65)
-                                                .foregroundStyle(.purple)
+                                                .foregroundStyle(Color.accentColor)
                                             Text("\(Image(systemName: "newspaper"))")
                                                 .font(.system(size: 30))
                                                 .foregroundStyle(Color(.systemBackground))
@@ -1102,7 +1112,7 @@ struct TryItView: View { //interactive little mini sheet to play with
                                                         .stroke(.black, lineWidth: 6)
                                                 )
                                                 .padding(5)
-                                                .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(.purple)))
+                                                .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(Color.accentColor)))
                                         }
                                     }
                                     .foregroundStyle(.primary)
@@ -1378,7 +1388,7 @@ struct ModIconView: View { //tutorial view on completing or removing icon
                                     }
                                 }
                                 .foregroundStyle(.primary)
-                                .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(.purple)))
+                                .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(Color.accentColor)))
                         }
                     }
                 } else {
@@ -1434,6 +1444,7 @@ struct ModIconView: View { //tutorial view on completing or removing icon
                                 Image(systemName:"xmark.square.fill")
                                     .resizable()
                                     .frame(width: horizontalSizeClass == .compact ? min(100, 350) : min(150, 500), height: horizontalSizeClass == .compact ? min(100, 350) : min(150, 500))
+                                    .symbolRenderingMode(.hierarchical)
                                 
                                 Text("Cancel")
                                     .font(.system(size: horizontalSizeClass == .compact ? 15 : 25, weight: .semibold, design: .rounded))
@@ -1563,7 +1574,7 @@ struct ButtonsView: View { //view describing the buttons on a sheet
                             .resizable()
                             .padding()
                             .frame(width: min(100, 200), height: min(100, 200))
-                            .foregroundStyle(.purple)
+                            .foregroundStyle(Color.accentColor)
                         Image(systemName: "square.grid.2x2")
                             .resizable()
                             .frame(width: min(40, 100), height: min(40, 100))
@@ -1650,7 +1661,7 @@ struct GotItView: View { //confirmation to go back/create a sheet or to rewatch 
                         }
                         .foregroundStyle(.white)
                         .padding([.top, .bottom], horizontalSizeClass == .compact ? 10 : 20)
-                        .background(Color.purple)
+                        .background(Color.accentColor)
                         .cornerRadius(horizontalSizeClass == .compact ? 20 : 30)
                         .padding([.leading, .trailing])
                     }

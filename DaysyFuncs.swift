@@ -458,13 +458,13 @@ func updateUsage(_ icon: String) -> Void {
 // Function to save usage data to UserDefaults
 func saveUsage(_ usageData: [UsageData]) {
     if let encodedData = try? encoder.encode(usageData) {
-        UserDefaults.standard.set(encodedData, forKey: "usageData")
+        defaults.set(encodedData, forKey: "usageData")
     }
 }
 
 // Function to retrieve usage data from UserDefaults
 func getUsage() -> [UsageData] {
-    if let data = UserDefaults.standard.data(forKey: "usageData"),
+    if let data = defaults.data(forKey: "usageData"),
        var decodedData = try? decoder.decode([UsageData].self, from: data) {
 
         // Modify all dates in the array to be at 11:59:59 pm
@@ -530,6 +530,26 @@ func getSettings() -> [String: Bool] {
     settings["communicationDefaultMode"] = defaults.bool(forKey: "communicationDefaultMode")
     return settings
     
+}
+
+func playAudio(_ iconName: String) {
+    print("playing audio for the icon \(iconName)")
+    var audioPlayer: AVAudioPlayer?
+    let customAudioAddresses = getCustomAudioAddresses()
+    
+    guard let localURL = URL(string: String("\(documentsURL)") + (customAudioAddresses[iconName] ?? "")) else {
+        currSessionLog.append("Invalid local URL string.")
+        return
+    }
+    print("found audio file at \(localURL)")
+
+    do {
+        audioPlayer = try AVAudioPlayer(contentsOf: localURL)
+        audioPlayer?.prepareToPlay()
+        audioPlayer?.play()
+    } catch {
+        currSessionLog.append("Error loading audio from local URL: \(error.localizedDescription)")
+    }
 }
 
 
@@ -946,7 +966,7 @@ func getCustomIconPreviews() async -> [String: UIImage] {
 func getCustomPECSAddresses() -> [String: String] {
     
     if defaults.bool(forKey: "newIcons") {
-        if let storedData = UserDefaults.standard.data(forKey: "newCustomIconAddresses"),
+        if let storedData = defaults.data(forKey: "newCustomIconAddresses"),
            let customPECSAddresses = try? decoder.decode([String: String].self, from: storedData) {
             return customPECSAddresses
         } else {
@@ -954,12 +974,50 @@ func getCustomPECSAddresses() -> [String: String] {
         }
     } else {
         
-        if let storedData = UserDefaults.standard.data(forKey: "customPECSAddresses"),
+        if let storedData = defaults.data(forKey: "customPECSAddresses"),
            let customPECSAddresses = try? decoder.decode([String: String].self, from: storedData) {
             return customPECSAddresses
         } else {
             return [:] // Return an empty dictionary if not found or decoding fails
         }
+    }
+}
+
+func saveCustomPECSAddresses(_ addresses: [String: String]) {
+    
+    if defaults.bool(forKey: "newIcons") {
+        do {
+            let data = try encoder.encode(addresses)
+            defaults.set(data, forKey: "newCustomIconAddresses")
+        } catch {
+            currSessionLog.append("Error encoding custom PECS addresses: \(error.localizedDescription)")
+        }
+    } else {
+        do {
+            let data = try encoder.encode(addresses)
+            defaults.set(data, forKey: "customPECSAddresses")
+        } catch {
+            currSessionLog.append("Error encoding custom PECS addresses: \(error.localizedDescription)")
+        }
+    }
+}
+
+func getCustomAudioAddresses() -> [String: String] {
+    if let storedData = defaults.data(forKey: "customAudioAddresses"),
+       let customPECSAddresses = try? decoder.decode([String: String].self, from: storedData) {
+        return customPECSAddresses
+    } else {
+        return [:] // Return an empty dictionary if not found or decoding fails
+    }
+}
+
+
+func saveCustomAudioAddresses(_ addresses: [String: String]) {
+    do {
+        let data = try encoder.encode(addresses)
+        defaults.set(data, forKey: "customAudioAddresses")
+    } catch {
+        currSessionLog.append("Error encoding custom PECS addresses: \(error.localizedDescription)")
     }
 }
 
@@ -1004,26 +1062,6 @@ func clearDocumentsDirectory() {
     } catch {
         currSessionLog.append("Error clearing documents directory: \(error.localizedDescription)")
     }
-}
-
-func saveCustomPECSAddresses(_ addresses: [String: String]) {
-    
-    if defaults.bool(forKey: "newIcons") {
-        do {
-            let data = try encoder.encode(addresses)
-            UserDefaults.standard.set(data, forKey: "newCustomIconAddresses")
-        } catch {
-            currSessionLog.append("Error encoding custom PECS addresses: \(error.localizedDescription)")
-        }
-    } else {
-        do {
-            let data = try encoder.encode(addresses)
-            UserDefaults.standard.set(data, forKey: "customPECSAddresses")
-        } catch {
-            currSessionLog.append("Error encoding custom PECS addresses: \(error.localizedDescription)")
-        }
-    }
-    
 }
 
 func saveImageToDocumentsDirectory(_ uiImage: UIImage, fileName: String = generateUniqueName() + ".jpg") -> String {
@@ -1413,21 +1451,23 @@ func hapticFeedback(type: Int = 2, impactStyle: UIImpactFeedbackGenerator.Feedba
 func fetchCustomImage(queryText: String, completion: @escaping (UIImage?) -> Void) {
     let query = ImagesQuery(prompt: queryText, n: 1, size: ImagesQuery.Size._1024)
     
-    // Fetch images query asynchronously
     Task {
-        await imageStore.images(query: query)
-        
-        // Check if there are images in the store
-        guard imageStore.images.count > 0,
-              let urlString = imageStore.images[0].url,
-              !urlString.isEmpty,
-              let url = URL(string: urlString) else {
-            completion(nil)
-            return
+        do {
+            await imageStore.images(query: query)
+            let fetchedImages = imageStore.images
+            
+            // Check if there are images in the store
+            guard fetchedImages.count > 0,
+                  let urlString = fetchedImages[0].url,
+                  !urlString.isEmpty,
+                  let url = URL(string: urlString) else {
+                completion(nil)
+                return
+            }
+            
+            let image = await downloadImage(from: url)
+            completion(image)
         }
-        
-        let image = await downloadImage(from: url)
-        completion(image)
     }
 }
 

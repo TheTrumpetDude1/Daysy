@@ -239,6 +239,105 @@ struct UsageData: Codable, Identifiable {
     }
 }
 
+import SwiftUI
+import AVFoundation
+
+class AudioRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate, AVAudioPlayerDelegate {
+    @Published var isRecording = false
+    @Published var isPlaying = false
+    @Published var audioFilename: URL?
+    
+    var audioRecorder: AVAudioRecorder?
+    var audioPlayer: AVAudioPlayer?
+    
+    let documentsURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    
+    override init() {
+        super.init()
+        setupAudioSession()
+    }
+    
+    func setupAudioSession() {
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.playAndRecord, options: [.duckOthers])
+            try audioSession.setActive(true)
+        } catch {
+            print("Failed to set up audio session: \(error.localizedDescription)")
+        }
+    }
+    
+    func startRecording() {
+        let filename = UUID().uuidString + ".m4a"
+        let fileURL = documentsURL.appendingPathComponent(filename)
+        audioFilename = fileURL
+        
+        let settings: [String: Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: 44100,
+            AVNumberOfChannelsKey: 2,
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
+        
+        do {
+            audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
+            audioRecorder?.delegate = self
+            audioRecorder?.record()
+            isRecording = true
+        } catch {
+            print("Failed to start recording: \(error.localizedDescription)")
+        }
+    }
+    
+    func stopRecording() {
+        audioRecorder?.stop()
+        isRecording = false
+    }
+    
+    func playRecording() {
+        guard let fileURL = audioFilename else {
+            print("Audio file URL is nil.")
+            return
+        }
+        print("playing recording \(fileURL.lastPathComponent) (\(fileURL)")
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: fileURL)
+            audioPlayer?.delegate = self
+            audioPlayer?.play()
+            isPlaying = true
+        } catch {
+            print("Failed to play recording: \(error.localizedDescription)")
+        }
+    }
+    
+    func stopPlaying() {
+        audioPlayer?.stop()
+        isPlaying = false
+    }
+    
+    func deleteRecording() {
+        guard let fileURL = audioFilename else {
+            print("Audio file URL is nil.")
+            return
+        }
+        
+        do {
+            try FileManager.default.removeItem(at: fileURL)
+            audioFilename = nil
+        } catch {
+            print("Failed to delete recording: \(error.localizedDescription)")
+        }
+    }
+    
+    func saveRecording() -> String? {
+        guard let fileURL = audioFilename else {
+            print("Audio file URL is nil.")
+            return nil
+        }
+        return fileURL.lastPathComponent
+    }
+}
+
 
 
 //viewcontrollers and representables below
@@ -551,40 +650,43 @@ struct FolderPreviewView: View, Equatable {
     var folderColor: Color = .blue
     
     var body: some View {
-        VStack {
+        let components = currCommunicationBoard[index][0].components(separatedBy: "_description_")
+        let currFolderName = components[0]
+        let currFolderDescription = components.count>1 ? components[1] : ""
+        ZStack {
             ZStack {
-//                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 3), spacing: 0) {
-                    //                    if currCommunicationBoard[index].count < 9 {
-                    //                        ForEach(0..<(8 - currCommunicationBoard[index].count), id: \.self) { icon in
-                    //                            Image(systemName: "square")
-                    //                                .resizable()
-                    //                                .scaledToFill()
-                    //                                .foregroundStyle(.clear)
-                    //                        }
-                    //                    }
-                    //                    ForEach(currCommunicationBoard[index].dropFirst().prefix(9), id: \.self) { icon in
-                    //                        if UIImage(named: icon) == nil {
-                    //                            getCustomIcon(icon)
-                    //                                .scaledToFill()
-                    //                                .clipShape(RoundedRectangle(cornerRadius: 2))
-                    //                                .overlay(
-                    //                                    RoundedRectangle(cornerRadius: 2)
-                    //                                        .stroke(.black, linewidth: 0.5)
-                    //                                )
-                    //                                .foregroundStyle(.primary)
-                    //                        } else {
-                    //                            Image(icon)
-                    //                                .resizable()
-                    //                                .scaledToFill()
-                    //                                .clipShape(RoundedRectangle(cornerRadius: 2))
-                    //                                .overlay(
-                    //                                    RoundedRectangle(cornerRadius: 2)
-                    //                                        .stroke(.black, linewidth: 0.5)
-                    //                                )
-                    //                                .foregroundStyle(.primary)
-                    //                        }
-                    //                    }
-//                }
+                //                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 3), spacing: 0) {
+                //                    if currCommunicationBoard[index].count < 9 {
+                //                        ForEach(0..<(8 - currCommunicationBoard[index].count), id: \.self) { icon in
+                //                            Image(systemName: "square")
+                //                                .resizable()
+                //                                .scaledToFill()
+                //                                .foregroundStyle(.clear)
+                //                        }
+                //                    }
+                //                    ForEach(currCommunicationBoard[index].dropFirst().prefix(9), id: \.self) { icon in
+                //                        if UIImage(named: icon) == nil {
+                //                            getCustomIcon(icon)
+                //                                .scaledToFill()
+                //                                .clipShape(RoundedRectangle(cornerRadius: 2))
+                //                                .overlay(
+                //                                    RoundedRectangle(cornerRadius: 2)
+                //                                        .stroke(.black, linewidth: 0.5)
+                //                                )
+                //                                .foregroundStyle(.primary)
+                //                        } else {
+                //                            Image(icon)
+                //                                .resizable()
+                //                                .scaledToFill()
+                //                                .clipShape(RoundedRectangle(cornerRadius: 2))
+                //                                .overlay(
+                //                                    RoundedRectangle(cornerRadius: 2)
+                //                                        .stroke(.black, linewidth: 0.5)
+                //                                )
+                //                                .foregroundStyle(.primary)
+                //                        }
+                //                    }
+                //                }
                 if UIImage(named: currCommunicationBoard[index][1]) == nil {
                     getCustomIcon(currCommunicationBoard[index][1])
                         .scaledToFill()
@@ -603,18 +705,25 @@ struct FolderPreviewView: View, Equatable {
                     Image(systemName: "folder")
                         .resizable()
                         .scaledToFit()
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.purple)
                     Image(systemName: "folder.fill")
                         .resizable()
                         .scaledToFit()
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.purple)
                         .opacity(0.3)
                 }
             )
-            Text(altText == nil ? currCommunicationBoard[index][0] : altText!)
-                .font(.system(size: horizontalSizeClass == .compact ? 15 : 25, weight: .bold, design: .rounded))
-                .lineLimit(1)
-                .foregroundStyle(.primary)
+            VStack {
+                Spacer()
+                Text(altText == nil ? currFolderName : altText!)
+                    .font(.system(size: horizontalSizeClass == .compact ? 15 : 25, weight: .bold, design: .rounded))
+                    .lineLimit(1)
+                    .shadow(color: Color(.systemBackground), radius: 7, x: 0, y: 0)
+                    .shadow(color: Color(.systemBackground), radius: 7, x: 0, y: 0)
+                    .shadow(color: Color(.systemBackground), radius: 7, x: 0, y: 0)
+                    .shadow(color: Color(.systemBackground), radius: 7, x: 0, y: 0)
+                    .padding(.bottom)
+            }
         }
     }
     
@@ -770,17 +879,23 @@ class SpeechSynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, Observab
     }
     
     func speak(_ string: String) {
+        let customAudioAddresses = getCustomAudioAddresses()
+        
         guard defaults.bool(forKey: "speakOn") else { return }
-        do {
-            try audioSession.setCategory(.playback, options: [.duckOthers])
-            try audioSession.setActive(true)
-            let utterance = AVSpeechUtterance(string: extractKey(from: string))
-            utterance.voice = AVSpeechSynthesisVoice(identifier: currVoice) ?? AVSpeechSynthesisVoice()
-            utterance.rate = Float(currVoiceRatio / 2)
-            synthesizer.speak(utterance)
-        } catch {
-            currSessionLog.append("Error setting up audio session: \(error)")
-            return
+        if customAudioAddresses[string] == nil {
+            do {
+                try audioSession.setCategory(.playback, options: [.duckOthers])
+                try audioSession.setActive(true)
+                let utterance = AVSpeechUtterance(string: extractKey(from: string))
+                utterance.voice = AVSpeechSynthesisVoice(identifier: currVoice) ?? AVSpeechSynthesisVoice()
+                utterance.rate = Float(currVoiceRatio / 2)
+                synthesizer.speak(utterance)
+            } catch {
+                currSessionLog.append("Error setting up audio session: \(error)")
+                return
+            }
+        } else {
+            playAudio(string)
         }
     }
     

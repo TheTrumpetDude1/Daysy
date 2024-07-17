@@ -66,7 +66,8 @@ struct AllIconsPickerView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
                                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                                    .foregroundStyle(loadSheetArray().count > 1 ? Color(.systemGray3): Color(.systemGray6))
+                                    .foregroundStyle(.gray)
+                                    .symbolRenderingMode(.hierarchical)
                                     .padding([.top, .trailing])
                             }
                         }
@@ -160,7 +161,7 @@ struct AllIconsPickerView: View {
                                             Image(systemName: "ellipsis.circle.fill")
                                                 .resizable()
                                                 .frame(width: horizontalSizeClass == .compact ? 30 : 40, height: horizontalSizeClass == .compact ? 30 : 40)
-                                                .foregroundStyle(.purple)
+                                                .foregroundStyle(Color.accentColor)
                                         }
                                         Spacer()
                                     }
@@ -199,17 +200,19 @@ struct AllIconsPickerView: View {
                                     showCustom.toggle()
                                 }) {
                                     VStack {
-                                        Image(systemName: "photo.badge.plus")
+                                        Image(systemName: "square.badge.plus.fill")
                                             .resizable()
                                             .scaledToFill()
                                             .symbolRenderingMode(.hierarchical)
-                                        Text("Create Icon")
-                                            .font(.system(size: horizontalSizeClass == .compact ? 10 : 20, weight: .bold, design: .rounded))
+                                            .padding([.top, .trailing])
+//                                        Text("Create Icon")
+//                                            .minimumScaleFactor(0.1)
+//                                            .lineLimit(1)
+//                                            .font(.system(size: horizontalSizeClass == .compact ? 20 : 40, weight: .bold, design: .rounded))
+//                                            .padding(.leading)
                                     }
                                 }
                                 .foregroundStyle(.green)
-                                .padding(.leading, horizontalSizeClass == .compact ? 5 : 0)
-                                .padding(horizontalSizeClass == .compact ? 3 : 10)
 //                                .dropDestination(for: Data.self) { items, location in
 //                                    showCustom.toggle()
 //                                    customAnimate.toggle()
@@ -281,7 +284,7 @@ struct AllIconsPickerView: View {
                                                 Image(systemName: "ellipsis.circle.fill")
                                                     .resizable()
                                                     .frame(width: horizontalSizeClass == .compact ? 30 : 40, height: horizontalSizeClass == .compact ? 30 : 40)
-                                                    .foregroundStyle(.purple)
+                                                    .foregroundStyle(Color.accentColor)
                                             }
                                             Spacer()
                                         }
@@ -375,6 +378,8 @@ struct AllIconsPickerView: View {
                                 Image(systemName: "xmark.square.fill")
                                     .resizable()
                                     .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.gray, Color(.systemGray6))
                                 
                             }
                             .padding()

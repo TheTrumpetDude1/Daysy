@@ -13,6 +13,8 @@ struct CreateIconView: View {
     
     var modifyCustomIcon: () -> Void
     
+    @StateObject private var audioRecorder = AudioRecorder()
+    
     @State private var orientation = UIDeviceOrientation.unknown
     @State private var lastOrientation = UIDeviceOrientation.unknown
     @Environment(\.presentationMode) var presentation
@@ -38,174 +40,121 @@ struct CreateIconView: View {
     @State var selectedColor: Color = .black
     @State var searchText = ""
     @State var searchResults: [String] = []
-    @State private var task: Task<Void, Error>?
     @State var customizedText = false
+    @State var recordAudio = false
+    @State var currAudioRecordingAddress: String? = nil
     
     @State var currCommunicationBoard = loadCommunicationBoard()
     
     var body: some View {
         VStack {
-            RoundedRectangle(cornerRadius: (lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 25 : 50) : 50)
-                .stroke(Color.black, lineWidth: 5)
-                .background(
-                    RoundedRectangle(cornerRadius: (lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 25 : 50) : 50)
-                        .fill(Color.white)
-                )
-                .aspectRatio((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 4 : 1) : 1, contentMode: .fill)
-            //                        .clipShape(RoundedRectangle(cornerRadius: (lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 25 : 50) : 50))
-                .overlay(
-                    VStack {
-                        Spacer()
-                        //new stuff start here
-                        if !isCustomTextFieldActive || horizontalSizeClass == .compact || lastOrientation.isPortrait {
-                            ZStack {
-                                if selectedCustomImage == nil {
-                                    if isLoading {
-                                        ZStack {
-                                            Image(systemName: "square.fill")
-                                                .resizable()
-                                                .aspectRatio(1, contentMode: .fit)
-                                                .foregroundStyle(.purple)
-                                                .opacity(0.25)
-                                                .padding()
-                                            VStack {
-                                                LoadingIndicator(color: .white, size: .extraLarge)
-                                                    .animation(.snappy, value: true)
-                                                if isGenerating {
-                                                    Button(action: {
-                                                        task?.cancel()
-                                                        withAnimation(.spring) {
-                                                            isGenerating = false
-                                                            isLoading = false
-                                                        }
-                                                    }) {
-                                                        Text("\(Image(systemName: "xmark")) Stop Generating")
-                                                            .minimumScaleFactor(0.1)
-                                                            .lineLimit(1)
-                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                                            .foregroundStyle(.white)
-                                                            .padding()
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        TabView {
-                                            Button(action: {
-                                                isImagePickerPresented.toggle()
-                                            }) {
-                                                VStack {
-                                                    Text("\(Image(systemName:"photo.badge.plus"))")
-                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
-                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                        .symbolRenderingMode(.hierarchical)
-                                                    
-                                                    Text("Photos")
-                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                                }
-                                                .padding()
-                                            }
-                                            
-                                            Button(action: {
-                                                if hasCameraPermission() {
-                                                    showCamera.toggle()
-                                                    checkedCameraPermission = true
-                                                } else {
-                                                    if checkedCameraPermission {
-                                                        if let appSettings = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(appSettings) {
-                                                            UIApplication.shared.open(appSettings)
-                                                        }
-                                                    }
-                                                }
-                                            }) {
-                                                VStack {
-                                                    Text("\(Image(systemName:"camera.on.rectangle"))")
-                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
-                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                        .symbolRenderingMode(.hierarchical)
-                                                    
-                                                    
-                                                    Text("Take Picture")
-                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                                }
-                                                .padding()
-                                            }
-                                            
-                                            Button(action: {
-                                                showSymbols.toggle()
-                                            }) {
-                                                VStack {
-                                                    Text("\(Image(systemName:"textformat.abc.dottedunderline"))")
-                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
-                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                        .symbolRenderingMode(.hierarchical)
-                                                    
-                                                    Text("Symbols")
-                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                                }
-                                                .padding()
-                                            }
-                                            
-                                            Button(action: {
-                                                isDocumentPickerPresented.toggle()
-                                            }) {
-                                                VStack {
-                                                    Text("\(Image(systemName:"doc.badge.plus"))")
-                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
-                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                        .symbolRenderingMode(.hierarchical)
-                                                    
-                                                    Text("Documents")
-                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                                }
-                                                .padding()
-                                            }
-                                            
-                                            if aiOn  && isConnectedToInternet() {
-                                                Button(action: {
-                                                    withAnimation(.snappy) {
-                                                        isGenerating = true
-                                                        isLoading = true
-                                                    }
-                                                    task = Task {
-                                                        fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
-                                                            withAnimation(.snappy) {
-                                                                selectedCustomImage = image
-                                                                isLoading = false
-                                                                isGenerating = false
-                                                            }
-                                                        }
-                                                    }
-                                                }) {
-                                                    VStack {
-                                                        Text("\(Image(systemName:"wand.and.stars"))")
-                                                            .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
-                                                            .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                            .symbolRenderingMode(.hierarchical)
-                                                        
-                                                        Text("Generate Image")
-                                                            .lineLimit(1)
-                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                                    }
-                                                    .foregroundStyle(.purple)
-                                                    .padding()
-                                                }
-                                            }
-                                            
-                                        }
-                                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
-                                        .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-                                    }
+            if recordAudio {
+                VStack {
+                    Spacer()
+                    Text("this is where the visuals should go")
+                        .font(.system(size: horizontalSizeClass == .compact ? 25 : 50, weight: .medium,  design: .rounded))
+                    Spacer()
+                    HStack { //bottom row of buttons
+                        Button(action: {
+                            audioRecorder.deleteRecording()
+                            currAudioRecordingAddress = nil
+                            withAnimation(.snappy) {
+                                recordAudio.toggle()
+                            }
+                        }) {
+                            Image(systemName:"xmark.square.fill")
+                                .resizable()
+                                .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                                .foregroundStyle(.gray)
+                                .symbolRenderingMode(.hierarchical)
+                                .padding(horizontalSizeClass == .compact ? 0 : 5)
+                        }
+                        
+                        if audioRecorder.audioFilename != nil {
+                            Button(action: {
+                                if let savedFileName = audioRecorder.saveRecording() {
+                                    print("Recording saved with filename: \(savedFileName)")
+                                    currAudioRecordingAddress = savedFileName
+                                }
+                                withAnimation(.snappy) {
+                                    recordAudio.toggle()
+                                }
+                            }) {
+                                Image(systemName:"checkmark.square.fill")
+                                    .resizable()
+                                    .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                                    .foregroundStyle(.green)
+                                    .padding(horizontalSizeClass == .compact ? 0 : 5)
+                                
+                            }
+                        }
+                        Button(action: {
+                            if audioRecorder.isRecording {
+                                audioRecorder.stopRecording()
+                            } else {
+                                audioRecorder.startRecording()
+                            }
+                        }) {
+                            if audioRecorder.isRecording {
+                                Image(systemName: "stop.circle")
+                                    .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(Color.accentColor)
+                            } else {
+                                Image(systemName: "record.circle")
+                                    .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                        }
+                        .padding(horizontalSizeClass == .compact ? 0 : 5)
+                        if audioRecorder.audioFilename != nil && !audioRecorder.isRecording {
+                            Button(action: {
+                                if audioRecorder.isPlaying {
+                                    audioRecorder.stopPlaying()
                                 } else {
-                                    Button(action: {
-                                        showImageMenu.toggle()
-                                    }) {
+                                    audioRecorder.playRecording()
+                                }
+                            }) {
+                                if audioRecorder.isPlaying {
+                                    Image(systemName: "stop.circle.fill")
+                                        .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
+                                        .symbolRenderingMode(.hierarchical)
+                                        .foregroundStyle(Color.accentColor)
+                                } else {
+                                    Image(systemName: "play.circle.fill")
+                                        .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
+                                        .symbolRenderingMode(.hierarchical)
+                                        .foregroundStyle(Color.accentColor)
+                                }
+                            }
+                            .padding(horizontalSizeClass == .compact ? 0 : 5)
+                        }
+                    }
+                }
+                .transition(.movingParts.move(angle: .degrees(270)).combined(with: .opacity))
+            } else {
+                RoundedRectangle(cornerRadius: (lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 25 : 50) : 50)
+                    .stroke(Color.black, lineWidth: 5)
+                    .background(
+                        RoundedRectangle(cornerRadius: (lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 25 : 50) : 50)
+                            .fill(Color.white)
+                    )
+                    .aspectRatio((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 4 : 1) : 1, contentMode: .fill)
+                //                        .clipShape(RoundedRectangle(cornerRadius: (lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 25 : 50) : 50))
+                    .overlay(
+                        VStack {
+                            Spacer()
+                            //new stuff start here
+                            if !isCustomTextFieldActive || horizontalSizeClass == .compact || lastOrientation.isPortrait {
+                                ZStack {
+                                    if selectedCustomImage == nil {
                                         if isLoading {
                                             ZStack {
                                                 Image(systemName: "square.fill")
                                                     .resizable()
                                                     .aspectRatio(1, contentMode: .fit)
-                                                    .foregroundStyle(.purple)
+                                                    .foregroundStyle(Color.accentColor)
                                                     .opacity(0.25)
                                                     .padding()
                                                 VStack {
@@ -213,11 +162,11 @@ struct CreateIconView: View {
                                                         .animation(.snappy, value: true)
                                                     if isGenerating {
                                                         Button(action: {
-                                                            task?.cancel()
                                                             withAnimation(.spring) {
                                                                 isGenerating = false
                                                                 isLoading = false
                                                             }
+                                                            print("task cancelled, should stop generating")
                                                         }) {
                                                             Text("\(Image(systemName: "xmark")) Stop Generating")
                                                                 .minimumScaleFactor(0.1)
@@ -230,495 +179,643 @@ struct CreateIconView: View {
                                                 }
                                             }
                                         } else {
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .fill(Color.clear)
-                                                .background (
-                                                    selectedCustomImage?.asImage
+                                            TabView {
+                                                Button(action: {
+                                                    isImagePickerPresented.toggle()
+                                                }) {
+                                                    VStack {
+                                                        Text("\(Image(systemName:"photo.badge.plus"))")
+                                                            .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
+                                                            .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                            .symbolRenderingMode(.hierarchical)
+                                                        
+                                                        Text("Photos")
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                    }
+                                                    .padding()
+                                                }
+                                                
+                                                Button(action: {
+                                                    if hasCameraPermission() {
+                                                        showCamera.toggle()
+                                                        checkedCameraPermission = true
+                                                    } else {
+                                                        if checkedCameraPermission {
+                                                            if let appSettings = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(appSettings) {
+                                                                UIApplication.shared.open(appSettings)
+                                                            }
+                                                        }
+                                                    }
+                                                }) {
+                                                    VStack {
+                                                        Text("\(Image(systemName:"camera.on.rectangle"))")
+                                                            .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
+                                                            .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                            .symbolRenderingMode(.hierarchical)
+                                                        
+                                                        
+                                                        Text("Take Picture")
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                    }
+                                                    .padding()
+                                                }
+                                                
+                                                Button(action: {
+                                                    showSymbols.toggle()
+                                                }) {
+                                                    VStack {
+                                                        Text("\(Image(systemName:"textformat.abc.dottedunderline"))")
+                                                            .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
+                                                            .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                            .symbolRenderingMode(.hierarchical)
+                                                        
+                                                        Text("Symbols")
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                    }
+                                                    .padding()
+                                                }
+                                                
+                                                Button(action: {
+                                                    isDocumentPickerPresented.toggle()
+                                                }) {
+                                                    VStack {
+                                                        Text("\(Image(systemName:"doc.badge.plus"))")
+                                                            .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
+                                                            .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                            .symbolRenderingMode(.hierarchical)
+                                                        
+                                                        Text("Documents")
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                    }
+                                                    .padding()
+                                                }
+                                                
+                                                if aiOn  && isConnectedToInternet() {
+                                                    Button(action: {
+                                                        withAnimation(.snappy) {
+                                                            isGenerating = true
+                                                            isLoading = true
+                                                        }
+                                                        fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
+                                                            if isGenerating {
+                                                                withAnimation(.snappy) {
+                                                                    selectedCustomImage = image
+                                                                    isLoading = false
+                                                                    isGenerating = false
+                                                                }
+                                                            }
+                                                        }
+                                                    }) {
+                                                        VStack {
+                                                            Text("\(Image(systemName:"wand.and.stars"))")
+                                                                .font(.system(size: horizontalSizeClass == .compact ? 100 : 200, weight: .semibold, design: .rounded))
+                                                                .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                                .symbolRenderingMode(.hierarchical)
+                                                            
+                                                            Text("Generate Image")
+                                                                .lineLimit(1)
+                                                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                        }
+                                                        .foregroundStyle(Color.accentColor)
+                                                        .padding()
+                                                    }
+                                                }
+                                                
+                                            }
+                                            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
+                                            .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
+                                        }
+                                    } else {
+                                        Button(action: {
+                                            showImageMenu.toggle()
+                                        }) {
+                                            if isLoading {
+                                                ZStack {
+                                                    Image(systemName: "square.fill")
                                                         .resizable()
-                                                        .aspectRatio(contentMode: .fill)
-                                                )
-                                                .transition(.movingParts.filmExposure)
-                                                .aspectRatio(1, contentMode: .fit)
-                                                .clipShape(RoundedRectangle(cornerRadius: 20))
-                                                .padding()
+                                                        .aspectRatio(1, contentMode: .fit)
+                                                        .foregroundStyle(Color.accentColor)
+                                                        .opacity(0.25)
+                                                        .padding()
+                                                    VStack {
+                                                        LoadingIndicator(color: .white, size: .extraLarge)
+                                                            .animation(.snappy, value: true)
+                                                        if isGenerating {
+                                                            Button(action: {
+                                                                withAnimation(.spring) {
+                                                                    isGenerating = false
+                                                                    isLoading = false
+                                                                }
+                                                                print("task cancelled, should stop generating")
+                                                            }) {
+                                                                Text("\(Image(systemName: "xmark")) Stop Generating")
+                                                                    .minimumScaleFactor(0.1)
+                                                                    .lineLimit(1)
+                                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                                    .foregroundStyle(.white)
+                                                                    .padding()
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                RoundedRectangle(cornerRadius: 20)
+                                                    .fill(Color.clear)
+                                                    .background (
+                                                        selectedCustomImage?.asImage
+                                                            .resizable()
+                                                            .aspectRatio(contentMode: .fill)
+                                                    )
+                                                    .transition(.movingParts.filmExposure)
+                                                    .aspectRatio(1, contentMode: .fit)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                                                    .padding()
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            .popover(isPresented: $showImageMenu) {
-                                if horizontalSizeClass == .compact {
-                                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 2), spacing: 0) {
-                                        Button(action: {
-                                            isImagePickerPresented.toggle()
-                                            showImageMenu.toggle()
-                                            task?.cancel()
-                                        }) {
-                                            VStack {
-                                                Text("\(Image(systemName:"photo.badge.plus"))")
-                                                    .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
-                                                    .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                    .symbolRenderingMode(.hierarchical)
-                                                
-                                                Text("Photos")
-                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            }
-                                            .padding()
-                                        }
-                                        
-                                        Button(action: {
-                                            if hasCameraPermission() {
-                                                showCamera.toggle()
-                                                showImageMenu.toggle()
-                                                checkedCameraPermission = true
-                                                task?.cancel()
-                                            } else {
-                                                if checkedCameraPermission {
-                                                    if let appSettings = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(appSettings) {
-                                                        UIApplication.shared.open(appSettings)
-                                                    }
-                                                }
-                                            }
-                                        }) {
-                                            VStack {
-                                                Text("\(Image(systemName:"camera.on.rectangle"))")
-                                                    .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
-                                                    .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                    .symbolRenderingMode(.hierarchical)
-                                                
-                                                
-                                                Text("Take Picture")
-                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            }
-                                            .padding()
-                                        }
-                                        
-                                        Button(action: {
-                                            showSymbols.toggle()
-                                            showImageMenu.toggle()
-                                            task?.cancel()
-                                        }) {
-                                            VStack {
-                                                Text("\(Image(systemName:"textformat.abc.dottedunderline"))")
-                                                    .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
-                                                    .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                    .symbolRenderingMode(.hierarchical)
-                                                    .padding([.top, .bottom])
-                                                
-                                                Text("Symbols")
-                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            }
-                                            .padding()
-                                        }
-                                        
-                                        Button(action: {
-                                            isDocumentPickerPresented.toggle()
-                                            task?.cancel()
-                                        }) {
-                                            VStack {
-                                                Text("\(Image(systemName:"doc.badge.plus"))")
-                                                    .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
-                                                    .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                    .symbolRenderingMode(.hierarchical)
-                                                
-                                                Text("Documents")
-                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            }
-                                            .padding()
-                                        }
-                                        
-                                        if aiOn  && isConnectedToInternet() {
+                                .popover(isPresented: $showImageMenu) {
+                                    if horizontalSizeClass == .compact {
+                                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 2), spacing: 0) {
                                             Button(action: {
-                                                showImageMenu = false
-                                                withAnimation(.snappy) {
-                                                    isGenerating = true
-                                                    isLoading = true
+                                                isImagePickerPresented.toggle()
+                                                showImageMenu.toggle()
+                                                
+                                            }) {
+                                                VStack {
+                                                    Text("\(Image(systemName:"photo.badge.plus"))")
+                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
+                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                        .symbolRenderingMode(.hierarchical)
+                                                    
+                                                    Text("Photos")
+                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
                                                 }
-                                                task = Task {
-                                                    fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
-                                                        withAnimation(.snappy) {
-                                                            selectedCustomImage = image
-                                                            isLoading = false
-                                                            isGenerating = false
+                                                .padding()
+                                            }
+                                            
+                                            Button(action: {
+                                                if hasCameraPermission() {
+                                                    showCamera.toggle()
+                                                    showImageMenu.toggle()
+                                                    checkedCameraPermission = true
+                                                    
+                                                } else {
+                                                    if checkedCameraPermission {
+                                                        if let appSettings = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(appSettings) {
+                                                            UIApplication.shared.open(appSettings)
                                                         }
                                                     }
                                                 }
                                             }) {
                                                 VStack {
-                                                    Text("\(Image(systemName:"wand.and.stars"))")
+                                                    Text("\(Image(systemName:"camera.on.rectangle"))")
                                                         .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
                                                         .padding(horizontalSizeClass == .compact ? 5 : 15)
                                                         .symbolRenderingMode(.hierarchical)
                                                     
-                                                    Text("Generate Image")
+                                                    
+                                                    Text("Take Picture")
                                                         .font(.system(size: 20, weight: .semibold, design: .rounded))
                                                 }
                                                 .padding()
                                             }
-                                        }
-                                        Button(action: {
-                                            showImageMenu.toggle()
-                                            withAnimation(.snappy) {
-                                                selectedCustomImage = nil
-                                            }
-                                            task?.cancel()
-                                        }) {
-                                            if selectedCustomImage != nil {
+                                            
+                                            Button(action: {
+                                                showSymbols.toggle()
+                                                showImageMenu.toggle()
+                                                
+                                            }) {
                                                 VStack {
-                                                    ZStack {
-                                                        selectedCustomImage?.asImage
-                                                            .resizable()
-                                                            .frame(width: horizontalSizeClass == .compact ? 100 : 50, height: horizontalSizeClass == .compact ? 100 : 50)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                            .opacity(0.25)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                            .overlay(
-                                                                RoundedRectangle(cornerRadius: 8)
-                                                                    .stroke(.black, lineWidth: 3)
-                                                            )
+                                                    Text("\(Image(systemName:"textformat.abc.dottedunderline"))")
+                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
+                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                        .symbolRenderingMode(.hierarchical)
+                                                        .padding([.top, .bottom])
+                                                    
+                                                    Text("Symbols")
+                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                }
+                                                .padding()
+                                            }
+                                            
+                                            Button(action: {
+                                                isDocumentPickerPresented.toggle()
+                                                
+                                            }) {
+                                                VStack {
+                                                    Text("\(Image(systemName:"doc.badge.plus"))")
+                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
+                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                        .symbolRenderingMode(.hierarchical)
+                                                    
+                                                    Text("Documents")
+                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                }
+                                                .padding()
+                                            }
+                                            
+                                            if aiOn  && isConnectedToInternet() {
+                                                Button(action: {
+                                                    showImageMenu = false
+                                                    withAnimation(.snappy) {
+                                                        isGenerating = true
+                                                        isLoading = true
+                                                    }
+                                                    fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
+                                                        if isGenerating {
+                                                            withAnimation(.snappy) {
+                                                                selectedCustomImage = image
+                                                                isLoading = false
+                                                                isGenerating = false
+                                                            }
+                                                        }
+                                                    }
+                                                }) {
+                                                    VStack {
+                                                        Text("\(Image(systemName:"wand.and.stars"))")
+                                                            .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
                                                             .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                            .foregroundStyle(.red)
-                                                        Image(systemName: "trash.square.fill")
-                                                            .resizable()
-                                                            .frame(width: horizontalSizeClass == .compact ? 100 : 50, height: horizontalSizeClass == .compact ? 100 : 50)
-                                                            .padding()
                                                             .symbolRenderingMode(.hierarchical)
                                                         
+                                                        Text("Generate Image")
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
                                                     }
-                                                    Text("Delete Image")
+                                                    .padding()
+                                                }
+                                            }
+                                            Button(action: {
+                                                showImageMenu.toggle()
+                                                withAnimation(.snappy) {
+                                                    selectedCustomImage = nil
+                                                }
+                                                
+                                            }) {
+                                                if selectedCustomImage != nil {
+                                                    VStack {
+                                                        ZStack {
+                                                            selectedCustomImage?.asImage
+                                                                .resizable()
+                                                                .frame(width: horizontalSizeClass == .compact ? 100 : 50, height: horizontalSizeClass == .compact ? 100 : 50)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                .opacity(0.25)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                .overlay(
+                                                                    RoundedRectangle(cornerRadius: 8)
+                                                                        .stroke(.black, lineWidth: 3)
+                                                                )
+                                                                .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                                .foregroundStyle(.red)
+                                                            Image(systemName: "trash.square.fill")
+                                                                .resizable()
+                                                                .frame(width: horizontalSizeClass == .compact ? 100 : 50, height: horizontalSizeClass == .compact ? 100 : 50)
+                                                                .padding()
+                                                                .symbolRenderingMode(.hierarchical)
+                                                            
+                                                        }
+                                                        Text("Delete Image")
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                    }
+                                                    .foregroundStyle(.red)
+                                                    .padding()
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        HStack {
+                                            Button(action: {
+                                                isImagePickerPresented.toggle()
+                                                showImageMenu.toggle()
+                                                
+                                            }) {
+                                                VStack {
+                                                    Text("\(Image(systemName:"photo.badge.plus"))")
+                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
+                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                        .symbolRenderingMode(.hierarchical)
+                                                    
+                                                    Text("Photos")
                                                         .font(.system(size: 20, weight: .semibold, design: .rounded))
                                                 }
-                                                .foregroundStyle(.red)
                                                 .padding()
                                             }
-                                        }
-                                    }
-                                } else {
-                                    HStack {
-                                        Button(action: {
-                                            isImagePickerPresented.toggle()
-                                            showImageMenu.toggle()
-                                            task?.cancel()
-                                        }) {
-                                            VStack {
-                                                Text("\(Image(systemName:"photo.badge.plus"))")
-                                                    .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
-                                                    .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                    .symbolRenderingMode(.hierarchical)
-                                                
-                                                Text("Photos")
-                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            }
-                                            .padding()
-                                        }
-                                        
-                                        Button(action: {
-                                            if hasCameraPermission() {
-                                                showCamera.toggle()
-                                                showImageMenu.toggle()
-                                                checkedCameraPermission = true
-                                                task?.cancel()
-                                            } else {
-                                                if checkedCameraPermission {
-                                                    if let appSettings = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(appSettings) {
-                                                        UIApplication.shared.open(appSettings)
-                                                    }
-                                                }
-                                            }
-                                        }) {
-                                            VStack {
-                                                Text("\(Image(systemName:"camera.on.rectangle"))")
-                                                    .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
-                                                    .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                    .symbolRenderingMode(.hierarchical)
-                                                
-                                                
-                                                Text("Take Picture")
-                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            }
-                                            .padding()
-                                        }
-                                        
-                                        Button(action: {
-                                            showSymbols.toggle()
-                                            showImageMenu.toggle()
-                                            task?.cancel()
-                                        }) {
-                                            VStack {
-                                                Text("\(Image(systemName:"textformat.abc.dottedunderline"))")
-                                                    .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
-                                                    .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                    .symbolRenderingMode(.hierarchical)
-                                                
-                                                Text("Symbols")
-                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            }
-                                            .padding()
-                                        }
-                                        
-                                        Button(action: {
-                                            isDocumentPickerPresented.toggle()
-                                            task?.cancel()
-                                        }) {
-                                            VStack {
-                                                Text("\(Image(systemName:"doc.badge.plus"))")
-                                                    .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
-                                                    .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                    .symbolRenderingMode(.hierarchical)
-                                                
-                                                Text("Documents")
-                                                    .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                            }
-                                            .padding()
-                                        }
-                                        
-                                        if aiOn  && isConnectedToInternet() {
+                                            
                                             Button(action: {
-                                                showImageMenu = false
-                                                withAnimation(.snappy) {
-                                                    isGenerating = true
-                                                    isLoading = true
-                                                }
-                                                task = Task {
-                                                    fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
-                                                        withAnimation(.snappy) {
-                                                            selectedCustomImage = image
-                                                            isLoading = false
-                                                            isGenerating = false
+                                                if hasCameraPermission() {
+                                                    showCamera.toggle()
+                                                    showImageMenu.toggle()
+                                                    checkedCameraPermission = true
+                                                    
+                                                } else {
+                                                    if checkedCameraPermission {
+                                                        if let appSettings = URL(string: UIApplication.openSettingsURLString), UIApplication.shared.canOpenURL(appSettings) {
+                                                            UIApplication.shared.open(appSettings)
                                                         }
                                                     }
                                                 }
                                             }) {
                                                 VStack {
-                                                    Text("\(Image(systemName:"wand.and.stars"))")
+                                                    Text("\(Image(systemName:"camera.on.rectangle"))")
                                                         .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
                                                         .padding(horizontalSizeClass == .compact ? 5 : 15)
                                                         .symbolRenderingMode(.hierarchical)
                                                     
-                                                    Text("Generate Image")
+                                                    
+                                                    Text("Take Picture")
                                                         .font(.system(size: 20, weight: .semibold, design: .rounded))
                                                 }
-                                                .foregroundStyle(.purple)
                                                 .padding()
                                             }
-                                        }
-                                        Button(action: {
-                                            showImageMenu.toggle()
-                                            withAnimation(.snappy) {
-                                                selectedCustomImage = nil
-                                            }
-                                        }) {
-                                            if selectedCustomImage != nil {
+                                            
+                                            Button(action: {
+                                                showSymbols.toggle()
+                                                showImageMenu.toggle()
+                                                
+                                            }) {
                                                 VStack {
-                                                    ZStack {
-                                                        selectedCustomImage?.asImage
-                                                            .resizable()
-                                                            .frame(width: horizontalSizeClass == .compact ? 100 : 50, height: horizontalSizeClass == .compact ? 100 : 50)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                            .opacity(0.25)
-                                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                            .overlay(
-                                                                RoundedRectangle(cornerRadius: 8)
-                                                                    .stroke(.black, lineWidth: 3)
-                                                            )
+                                                    Text("\(Image(systemName:"textformat.abc.dottedunderline"))")
+                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
+                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                        .symbolRenderingMode(.hierarchical)
+                                                    
+                                                    Text("Symbols")
+                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                }
+                                                .padding()
+                                            }
+                                            
+                                            Button(action: {
+                                                isDocumentPickerPresented.toggle()
+                                                
+                                            }) {
+                                                VStack {
+                                                    Text("\(Image(systemName:"doc.badge.plus"))")
+                                                        .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
+                                                        .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                        .symbolRenderingMode(.hierarchical)
+                                                    
+                                                    Text("Documents")
+                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                }
+                                                .padding()
+                                            }
+                                            
+                                            if aiOn  && isConnectedToInternet() {
+                                                Button(action: {
+                                                    showImageMenu = false
+                                                    withAnimation(.snappy) {
+                                                        isGenerating = true
+                                                        isLoading = true
+                                                    }
+                                                    fetchCustomImage(queryText: currCustomIconText.isEmpty ? "a random, happy, realistic illustration" : currCustomIconText) { image in
+                                                        if isGenerating {
+                                                            withAnimation(.snappy) {
+                                                                selectedCustomImage = image
+                                                                isLoading = false
+                                                                isGenerating = false
+                                                            }
+                                                        }
+                                                    }
+                                                }) {
+                                                    VStack {
+                                                        Text("\(Image(systemName:"wand.and.stars"))")
+                                                            .font(.system(size: horizontalSizeClass == .compact ? 100 : 50, weight: .semibold, design: .rounded))
                                                             .padding(horizontalSizeClass == .compact ? 5 : 15)
-                                                            .foregroundStyle(.red)
-                                                        Image(systemName: "trash.square.fill")
-                                                            .resizable()
-                                                            .frame(width: horizontalSizeClass == .compact ? 100 : 50, height: horizontalSizeClass == .compact ? 100 : 50)
-                                                            .padding()
                                                             .symbolRenderingMode(.hierarchical)
                                                         
+                                                        Text("Generate Image")
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
                                                     }
-                                                    Text("Delete Image")
-                                                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                    .foregroundStyle(Color.accentColor)
+                                                    .padding()
                                                 }
-                                                .foregroundStyle(.red)
-                                                .padding()
+                                            }
+                                            Button(action: {
+                                                showImageMenu.toggle()
+                                                withAnimation(.snappy) {
+                                                    selectedCustomImage = nil
+                                                }
+                                            }) {
+                                                if selectedCustomImage != nil {
+                                                    VStack {
+                                                        ZStack {
+                                                            selectedCustomImage?.asImage
+                                                                .resizable()
+                                                                .frame(width: horizontalSizeClass == .compact ? 100 : 50, height: horizontalSizeClass == .compact ? 100 : 50)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                .opacity(0.25)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                                .overlay(
+                                                                    RoundedRectangle(cornerRadius: 8)
+                                                                        .stroke(.black, lineWidth: 3)
+                                                                )
+                                                                .padding(horizontalSizeClass == .compact ? 5 : 15)
+                                                                .foregroundStyle(.red)
+                                                            Image(systemName: "trash.square.fill")
+                                                                .resizable()
+                                                                .frame(width: horizontalSizeClass == .compact ? 100 : 50, height: horizontalSizeClass == .compact ? 100 : 50)
+                                                                .padding()
+                                                                .symbolRenderingMode(.hierarchical)
+                                                            
+                                                        }
+                                                        Text("Delete Image")
+                                                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                                    }
+                                                    .foregroundStyle(.red)
+                                                    .padding()
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                //                                .dropDestination(for: Data.self) { items, location in
+                                //                                    isLoading.toggle()
+                                //                                    guard let item = items.first else {
+                                //                                        selectedCustomImage = nil
+                                //                                        return false
+                                //                                    }
+                                //                                    guard let uiImage = UIImage(data: item) else {
+                                //                                        selectedCustomImage = nil
+                                //                                        return false
+                                //                                    }
+                                //                                    selectedCustomImage = uiImage
+                                //                                    if currCustomIconText.isEmpty {
+                                //                                        currCustomIconText = labelImage(input: uiImage).components(separatedBy: ", ")[0]
+                                //                                    }
+                                //                                    return true
+                                //                                }
+                                Spacer()
                             }
-                            //                                .dropDestination(for: Data.self) { items, location in
-                            //                                    isLoading.toggle()
-                            //                                    guard let item = items.first else {
-                            //                                        selectedCustomImage = nil
-                            //                                        return false
-                            //                                    }
-                            //                                    guard let uiImage = UIImage(data: item) else {
-                            //                                        selectedCustomImage = nil
-                            //                                        return false
-                            //                                    }
-                            //                                    selectedCustomImage = uiImage
-                            //                                    if currCustomIconText.isEmpty {
-                            //                                        currCustomIconText = labelImage(input: uiImage).components(separatedBy: ", ")[0]
-                            //                                    }
-                            //                                    return true
-                            //                                }
-                            Spacer()
-                        }
-                        HStack {
-                            ZStack { //zstack with gray is to workaround low contrast on dark mode despite white background
-                                Text("Label")
+                            HStack {
+                                ZStack { //zstack with gray is to workaround low contrast on dark mode despite white background
+                                    Text("Label")
+                                        .minimumScaleFactor(0.1)
+                                        .multilineTextAlignment(.center)
+                                        .font(.system(size: horizontalSizeClass == .compact ? ((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? 30 : 50) : ((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? 75 : 135), weight: .semibold,  design: .rounded))
+                                        .foregroundStyle(currCustomIconText.isEmpty ? .gray : .clear)
+                                    TextField("Label", text: $currCustomIconText, onEditingChanged: { editing in
+                                        withAnimation(.snappy) {
+                                            isCustomTextFieldActive = editing
+                                        }
+                                    }, onCommit: {
+                                        showImageMenu = false
+                                    })
                                     .minimumScaleFactor(0.1)
                                     .multilineTextAlignment(.center)
                                     .font(.system(size: horizontalSizeClass == .compact ? ((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? 30 : 50) : ((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? 75 : 135), weight: .semibold,  design: .rounded))
-                                    .foregroundStyle(currCustomIconText.isEmpty ? .gray : .clear)
-                                TextField("Label", text: $currCustomIconText, onEditingChanged: { editing in
-                                    withAnimation(.snappy) {
-                                        isCustomTextFieldActive = editing
-                                    }
-                                }, onCommit: {
-                                    showImageMenu = false
-                                })
-                                .minimumScaleFactor(0.1)
-                                .multilineTextAlignment(.center)
-                                .font(.system(size: horizontalSizeClass == .compact ? ((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? 30 : 50) : ((lastOrientation.isLandscape && horizontalSizeClass != .compact) ? 75 : 135), weight: .semibold,  design: .rounded))
-                                .foregroundStyle(.black)
+                                    .foregroundStyle(.black)
+                                }
+                                if !currCustomIconText.isEmpty && !isCustomTextFieldActive {
+                                    Spacer()
+                                    Spacer()
+                                }
                             }
-                            if !currCustomIconText.isEmpty && !isCustomTextFieldActive {
-                                Spacer()
+                            .padding()
+                            if isCustomTextFieldActive && horizontalSizeClass != .compact || lastOrientation.isLandscape {
                                 Spacer()
                             }
                         }
-                        .padding()
-                        if isCustomTextFieldActive && horizontalSizeClass != .compact || lastOrientation.isLandscape {
-                            Spacer()
-                        }
-                    }
-                )
-                .scaledToFit()
-                .padding()
-            HStack { //bottom row of buttons
-                Button(action: {
-                    self.presentation.wrappedValue.dismiss()
-                    currCustomIconText = ""
-                    selectedCustomImage = nil
-                    showImageMenu = false
-                    task?.cancel()
-                }) {
-                    Image(systemName:"xmark.square.fill")
-                        .resizable()
-                        .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                        .foregroundStyle(.gray)
-                        .symbolRenderingMode(!isLoading && (selectedCustomImage != nil || !currCustomIconText.isEmpty) ? .hierarchical : .monochrome)
-                }
-                .padding(horizontalSizeClass == .compact ? 0 : 5)
-                
-                if !isLoading && (selectedCustomImage != nil || !currCustomIconText.isEmpty) {
+                    )
+                    .scaledToFit()
+                    .padding()
+                HStack { //bottom row of buttons
                     Button(action: {
-                        var customPECSAddresses = getCustomPECSAddresses()
+                        self.presentation.wrappedValue.dismiss()
+                        currCustomIconText = ""
+                        selectedCustomImage = nil
+                        showImageMenu = false
                         
-                        if editCustom {  //problem in here somewhere
-                            if currCustomIconText != oldEditingIcon { //if the text has changed
+                    }) {
+                        Image(systemName:"xmark.square.fill")
+                            .resizable()
+                            .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                            .foregroundStyle(.gray)
+                            .symbolRenderingMode(.hierarchical)
+                            .padding(horizontalSizeClass == .compact ? 0 : 5)
+                    }
+                    
+                    if !isLoading && (selectedCustomImage != nil || !currCustomIconText.isEmpty) {
+                        Button(action: {
+                            var customPECSAddresses = getCustomPECSAddresses()
+                            var customAudioAddresses = getCustomAudioAddresses()
+                            let currCommunicationBoard = loadCommunicationBoard()
+                            
+                            if editCustom {  //problem in here somewhere
+                                if currCustomIconText != oldEditingIcon { //if the text has changed
+                                    
+                                    if currCustomIconText.isEmpty { //if its empty then give it something to go off of
+                                        if !currCommunicationBoard.filter({ $0.count == 1 }).contains(["0#id"]) {
+                                            currCustomIconText = "0#id"
+                                        } else {
+                                            var i = 1
+                                            while currCommunicationBoard.filter({ $0.count == 1 }).contains(["\(i)#id"]) {
+                                                i += 1
+                                            }
+                                            currCustomIconText = "\(i)#id"
+                                        }
+                                    }
+                                    if currCommunicationBoard.filter({ $0.count == 1 }).contains([currCustomIconText]) { //if there is already something named the same thing then change it
+                                        var i = 1
+                                        while currCommunicationBoard.filter({ $0.count == 1 }).contains(["\(i)#id\(currCustomIconText)"]) {
+                                            i += 1
+                                        }
+                                        currCustomIconText = "\(i)#id\(currCustomIconText)"
+                                    }
+                                    
+                                    if loadImageFromLocalURL(customPECSAddresses[oldEditingIcon] ?? "") != nil { //if the old icon had an image
+                                        deleteFile(at: customPECSAddresses[oldEditingIcon]!) //then delete the old image
+                                    }
+                                    customPECSAddresses[oldEditingIcon] = nil //remove the old key
+                                    if selectedCustomImage == nil {
+                                        customPECSAddresses[currCustomIconText] = "" //if there is no image now then set the new value to be empty
+                                    } else {
+                                        customPECSAddresses[currCustomIconText] = saveImageToDocumentsDirectory(selectedCustomImage!) //else save the new image
+                                    }
+                                    saveSheetArray(sheetObjects: updateCustomIcons(oldKey: oldEditingIcon, newKey: currCustomIconText))
+                                } else if loadImageFromLocalURL(customPECSAddresses[currCustomIconText]!) != selectedCustomImage { //same text new image
+                                    if selectedCustomImage == nil {
+                                        customPECSAddresses[currCustomIconText] = "" //if there is no image now then set the new value to be empty
+                                    } else {
+                                        customPECSAddresses[currCustomIconText] = saveImageToDocumentsDirectory(selectedCustomImage!) //else save the new image
+                                    }
+                                }
                                 
-                                if currCustomIconText.isEmpty { //if its empty then give it something to go off of
-                                    if customPECSAddresses["0#id"] == nil {
+                            } else {
+                                if currCustomIconText.isEmpty {
+                                    if !currCommunicationBoard.filter({ $0.count == 1 }).contains(["0#id"]) {
                                         currCustomIconText = "0#id"
                                     } else {
                                         var i = 1
-                                        while customPECSAddresses["\(i)#id"] != nil {
+                                        while currCommunicationBoard.filter({ $0.count == 1 }).contains(["\(i)#id"]) {
                                             i += 1
                                         }
                                         currCustomIconText = "\(i)#id"
                                     }
                                 }
-                                if customPECSAddresses[currCustomIconText] != nil { //if there is already something named the same thing then change it
+                                if currCommunicationBoard.filter({ $0.count == 1 }).contains([currCustomIconText]) {
                                     var i = 1
-                                    while customPECSAddresses["\(i)#id\(currCustomIconText)"] != nil {
+                                    while currCommunicationBoard.filter({ $0.count == 1 }).contains(["\(i)#id\(currCustomIconText)"]) {
                                         i += 1
                                     }
-                                    currCustomIconText = "\(i)#id\(currCustomIconText)"
+                                    currCustomIconText =  "\(i)#id\(currCustomIconText)"
                                 }
-                                
-                                if loadImageFromLocalURL(customPECSAddresses[oldEditingIcon] ?? "") != nil { //if the old icon had an image
-                                    deleteFile(at: customPECSAddresses[oldEditingIcon]!) //then delete the old image
-                                }
-                                customPECSAddresses[oldEditingIcon] = nil //remove the old key
                                 if selectedCustomImage == nil {
-                                    customPECSAddresses[currCustomIconText] = "" //if there is no image now then set the new value to be empty
+                                    customPECSAddresses[currCustomIconText] = ""
                                 } else {
-                                    customPECSAddresses[currCustomIconText] = saveImageToDocumentsDirectory(selectedCustomImage!) //else save the new image
+                                    customPECSAddresses[currCustomIconText] = saveImageToDocumentsDirectory(selectedCustomImage!)
                                 }
-                                saveSheetArray(sheetObjects: updateCustomIcons(oldKey: oldEditingIcon, newKey: currCustomIconText))
-                            } else if loadImageFromLocalURL(customPECSAddresses[currCustomIconText]!) != selectedCustomImage { //same text new image
-                                if selectedCustomImage == nil {
-                                    customPECSAddresses[currCustomIconText] = "" //if there is no image now then set the new value to be empty
-                                } else {
-                                    customPECSAddresses[currCustomIconText] = saveImageToDocumentsDirectory(selectedCustomImage!) //else save the new image
-                                }
+                                var currCommunicationBoard = loadCommunicationBoard()
+                                currCommunicationBoard.insert([currCustomIconText], at: 0)
+                                saveCommunicationBoard(currCommunicationBoard)
                             }
-                            
-                        } else {
-                            if currCustomIconText.isEmpty {
-                                if customPECSAddresses["0#id"] == nil {
-                                    currCustomIconText = "0#id"
-                                } else {
-                                    var i = 1
-                                    while customPECSAddresses["\(i)#id"] != nil {
-                                        i += 1
-                                    }
-                                    currCustomIconText = "\(i)#id"
-                                }
+                            if currAudioRecordingAddress != nil {
+                                customAudioAddresses[currCustomIconText] = currAudioRecordingAddress
                             }
-                            if customPECSAddresses[currCustomIconText] != nil {
-                                var i = 1
-                                while customPECSAddresses["\(i)#id\(currCustomIconText)"] != nil {
-                                    i += 1
-                                }
-                                currCustomIconText =  "\(i)#id\(currCustomIconText)"
-                            }
-                            if selectedCustomImage == nil {
-                                customPECSAddresses[currCustomIconText] = ""
-                            } else {
-                                customPECSAddresses[currCustomIconText] = saveImageToDocumentsDirectory(selectedCustomImage!)
-                            }
-                            var currCommunicationBoard = loadCommunicationBoard()
-                            currCommunicationBoard.insert([currCustomIconText], at: 0)
-                            saveCommunicationBoard(currCommunicationBoard)
-                        }
-                        
-                        saveCustomPECSAddresses(customPECSAddresses)
-                        modifyCustomIcon()
-                        self.presentation.wrappedValue.dismiss()
-                        updateUsage("action:editIcon")
-                        selectedCustomImage = nil
-                        currCustomIconText = ""
-                        oldEditingIcon = ""
-                        task?.cancel()
-                    }) {
-                        if selectedCustomImage == nil && currCustomIconText.isEmpty && editCustom {
-                            Image(systemName:"trash.square.fill")
-                                .resizable()
-                                .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                                .foregroundStyle(.red)
-                                .symbolRenderingMode(.hierarchical)
-                                .padding()
-                        } else {
-                            Image(systemName:"checkmark.square.fill")
-                                .resizable()
-                                .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                                .foregroundStyle(.green)
-                        }
-                    }
-                    .padding(horizontalSizeClass == .compact ? 0 : 5)
-                }
-                /*
-                if !currCustomIconText.isEmpty && !isCustomTextFieldActive {
-                    Button(action: {
-                        withAnimation(.snappy) {
+                            saveCustomAudioAddresses(customAudioAddresses)
+                            saveCustomPECSAddresses(customPECSAddresses)
+                            modifyCustomIcon()
+                            self.presentation.wrappedValue.dismiss()
+                            updateUsage("action:editIcon")
+                            selectedCustomImage = nil
                             currCustomIconText = ""
+                            currAudioRecordingAddress = nil
+                            oldEditingIcon = ""
+                            isGenerating = false
+                        }) {
+                            if selectedCustomImage == nil && currCustomIconText.isEmpty && editCustom {
+                                Image(systemName:"trash.square.fill")
+                                    .resizable()
+                                    .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                                    .foregroundStyle(.red)
+                                    .symbolRenderingMode(.hierarchical)
+                                    .padding()
+                            } else {
+                                Image(systemName:"checkmark.square.fill")
+                                    .resizable()
+                                    .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                                    .foregroundStyle(.green)
+                                    .padding(horizontalSizeClass == .compact ? 0 : 5)
+                            }
                         }
-                    }) {
-                        Image(systemName: "delete.backward.fill")
-                            .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.red)
                     }
-                    .padding(horizontalSizeClass == .compact ? 0 : 5)
-                } */
+                    /*
+                    if !isLoading && (selectedCustomImage != nil || !currCustomIconText.isEmpty) && !isCustomTextFieldActive {
+                        Button(action: {
+                            withAnimation(.snappy) {
+                                recordAudio = true
+                            }
+                        }) {
+                            Image(systemName: "mic.square.fill")
+                                .resizable()
+                                .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(Color.accentColor)
+                        }
+                        .padding(horizontalSizeClass == .compact ? 0 : 5)
+                    } */
+                }
+                .ignoresSafeArea(.keyboard)
             }
-            .ignoresSafeArea(.keyboard)
         }
         .onChange(of: isCustomTextFieldActive, perform: { _ in
             if isCustomTextFieldActive && !currCustomIconText.isEmpty {
@@ -728,12 +825,22 @@ struct CreateIconView: View {
         .onChange(of: selectedCustomImage, perform: { _ in
             if !customizedText && selectedCustomImage != nil {
                 Task {
-                    withAnimation(.snappy) {
-                        currCustomIconText = await labelImage(input: selectedCustomImage!)
+                    let label = await labelImage(input: selectedCustomImage!)
+                    print("created the label: \(label)")
+                    if !isCustomTextFieldActive {
+                        withAnimation(.snappy) {
+                            currCustomIconText = label
+                            print("assigned label: \(label)")
+                        }
                     }
                 }
             }
         })
+        .onAppear {
+            if editCustom && !currCustomIconText.isEmpty {
+                customizedText = true
+            }
+        }
         .sheet(isPresented: $isDocumentPickerPresented) {
             DocumentImagePicker(selectedCustomImage: $selectedCustomImage, isLoading: $isLoading)
                 .ignoresSafeArea()
@@ -751,7 +858,7 @@ struct CreateIconView: View {
         .sheet(isPresented: $showSymbols) {
             VStack {
                 HStack {
-                    ForEach([Color.green, .orange, .blue, .red, .cyan, .purple, .black], id: \.self) { color in
+                    ForEach([Color.green, .orange, .blue, .red, .cyan, Color.accentColor, .black], id: \.self) { color in
                         Button(action: {
                             selectedColor = color
                         }) {
@@ -766,7 +873,9 @@ struct CreateIconView: View {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 25, weight: .bold, design: .rounded))
                             .foregroundStyle(.gray)
+                            .symbolRenderingMode(.hierarchical)
                     }
+                    .padding()
                 }
                 TextField("\(Image(systemName: "magnifyingglass")) Search", text: $searchText)
                     .multilineTextAlignment(.center)

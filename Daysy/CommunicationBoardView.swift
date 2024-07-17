@@ -44,6 +44,7 @@ struct CommunicationBoardView: View {
     @State var currFolder: [String] = []
     @State var currFolderIndex = 0
     @State var currFolderName = ""
+    @State var currFolderDescription = ""
     @State var newFolder = false
     @State var addFolderIcons = false
     @State var showCustom = false
@@ -168,6 +169,7 @@ struct CommunicationBoardView: View {
                                                                     }
                                                                     currFolderIndex = 0
                                                                     currFolderName = ""
+                                                                    currFolderDescription = ""
                                                                     focusFolder = true
                                                                     currFolder.append(searchResults[key])
                                                                 } label: {
@@ -268,6 +270,7 @@ struct CommunicationBoardView: View {
                                                             }
                                                             currFolderIndex = 0
                                                             currFolderName = ""
+                                                            currFolderDescription = ""
                                                             focusFolder = true
                                                             currFolder.append(searchResults[key])
                                                         } label: {
@@ -382,10 +385,12 @@ struct CommunicationBoardView: View {
                                                     blurOverlay = true
                                                 }
                                                 speechDelegate.stopSpeaking()
-                                                speechDelegate.speak(currCommunicationBoard[index][0])
+                                                speechDelegate.speak(currCommunicationBoard[index][0].components(separatedBy: "_description_")[0])
                                                 currFolderIndex = index
                                                 currFolder = currCommunicationBoard[index]
-                                                currFolderName = currCommunicationBoard[index][0]
+                                                let components = currFolder[0].components(separatedBy: "_description_")
+                                                currFolderName = components[0]
+                                                currFolderDescription = components.count>1 ? components[1] : ""
                                                 
                                             } else {
                                                 if currFolderName != "\(Image(systemName: "star.fill")) Most Used" {
@@ -432,7 +437,7 @@ struct CommunicationBoardView: View {
                                                 .padding(.bottom)
                                         }
                                     }
-                                    .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(.purple)))
+                                    .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(Color.accentColor)))
                                     .contextMenu {
                                         if lockButtonsOn && !unlockButtons {
                                             Button {
@@ -478,6 +483,7 @@ struct CommunicationBoardView: View {
                                                     }
                                                     currFolderIndex = 0
                                                     currFolderName = ""
+                                                    currFolderDescription = ""
                                                     focusFolder = true
                                                     currFolder.append(currCommunicationBoard[index+1][0])
                                                 } label: {
@@ -515,6 +521,7 @@ struct CommunicationBoardView: View {
                                                     }
                                                     currFolderIndex = 0
                                                     currFolderName = ""
+                                                    currFolderDescription = ""
                                                     focusFolder = true
                                                     currFolder.append(currCommunicationBoard[index+1][0])
                                                 } label: {
@@ -544,7 +551,9 @@ struct CommunicationBoardView: View {
                                             Divider()
                                             Button {
                                                 currFolder = currCommunicationBoard[index]
-                                                currFolderName = currCommunicationBoard[index][0]
+                                                let components = currFolder[0].components(separatedBy: "_description_")
+                                                currFolderName = components[0]
+                                                currFolderDescription = components.count>1 ? components[1] : ""
                                                 currFolderIndex = index
                                                 renameFolder.toggle()
                                             } label: {
@@ -571,9 +580,9 @@ struct CommunicationBoardView: View {
                         ProgressIndicatorView(isVisible: $showType, type: .bar(progress: Binding(
                             get: { CGFloat(speechDelegate.progress) },
                             set: { speechDelegate.progress = Double($0) }
-                        ), backgroundColor: .purple.opacity(0.2)))
+                        ), backgroundColor: Color.accentColor.opacity(0.2)))
                         .padding()
-                        .foregroundStyle(.purple)
+                        .foregroundStyle(Color.accentColor)
                         .frame(height: horizontalSizeClass == .compact ? 50 : 75)
                         HStack {
                             Text("Daysy will speak")
@@ -606,27 +615,27 @@ struct CommunicationBoardView: View {
                                         Text("Very Slow\(Image(systemName: "chevron.up.chevron.down"))")
                                             .lineLimit(1)
                                             .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
-                                            .foregroundStyle(.purple)
+                                            .foregroundStyle(Color.accentColor)
                                     } else if (round(currVoiceRatio * 10) / 10.0) == 0.4 {
                                         Text("Slow\(Image(systemName: "chevron.up.chevron.down"))")
                                             .lineLimit(1)
                                             .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
-                                            .foregroundStyle(.purple)
+                                            .foregroundStyle(Color.accentColor)
                                     } else if (round(currVoiceRatio * 10) / 10.0) == 1.0 {
                                         Text("Normal\(Image(systemName: "chevron.up.chevron.down"))")
                                             .lineLimit(1)
                                             .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
-                                            .foregroundStyle(.purple)
+                                            .foregroundStyle(Color.accentColor)
                                     } else if (round(currVoiceRatio * 10) / 10.0) == 1.1 {
                                         Text("Fast\(Image(systemName: "chevron.up.chevron.down"))")
                                             .lineLimit(1)
                                             .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
-                                            .foregroundStyle(.purple)
+                                            .foregroundStyle(Color.accentColor)
                                     } else if (round(currVoiceRatio * 10) / 10.0) == 1.3 {
                                         Text("Very Fast\(Image(systemName: "chevron.up.chevron.down"))")
                                             .lineLimit(1)
                                             .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
-                                            .foregroundStyle(.purple)
+                                            .foregroundStyle(Color.accentColor)
                                     }
                                 }
                             }
@@ -644,37 +653,52 @@ struct CommunicationBoardView: View {
             }
             if openFolder {
                 VStack {
-                    HStack {
+                    HStack(alignment: .bottom) {
                         if (lockButtonsOn && !unlockButtons) || currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
                             if currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
-                                Text("\(Image(systemName: "star.fill")) Most Used")
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.01)
-                                    .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
+                                VStack {
+                                    Text("\(Image(systemName: "star.fill")) Most Used")
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.01)
+                                        .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
+                                    Text("This folder contains your most used icons across all of your Sheets and your Communication Board.")
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.01)
+                                        .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
+                                        .foregroundStyle(.gray)
+                                }
                             } else {
-                                Text(currFolderName)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.01)
-                                    .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
+                                    Text(currFolderName)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.01)
+                                        .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
                             }
                         } else {
-                            TextField("New Folder", text: $currFolderName, onEditingChanged: { editing in
+                            TextField("Folder Name", text: $currFolderName, onEditingChanged: { editing in
                                 
                             }, onCommit: {
                                 if openFolder {
                                     if currFolderName.isEmpty {
-                                        currFolder[0] = "New Folder"
+                                        if currFolderDescription.isEmpty {
+                                            currFolder[0] = "New Folder"
+                                        } else {
+                                            currFolder[0] = "New Folder_description_\(currFolderDescription)"
+                                        }
                                     } else {
-                                        currFolder[0] = currFolderName
+                                        if currFolderDescription.isEmpty {
+                                            currFolder[0] = currFolderName
+                                        } else {
+                                            currFolder[0] = "\(currFolderName)_description_\(currFolderDescription)"
+                                        }
                                     }
                                     currCommunicationBoard[currFolderIndex] = currFolder
                                     saveCommunicationBoard(currCommunicationBoard)
                                 }
                             })
+                            .focused($focusFolder)
                             .lineLimit(1)
                             .minimumScaleFactor(0.01)
                             .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
-                            .focused($focusFolder)
                         }
                         Spacer()
                         Button(action: {
@@ -687,7 +711,19 @@ struct CommunicationBoardView: View {
                                     }
                                     saveCommunicationBoard(currCommunicationBoard)
                                 } else {
-                                    currFolder[0] = currFolderName
+                                    if currFolderName.isEmpty {
+                                        if currFolderDescription.isEmpty {
+                                            currFolder[0] = "New Folder"
+                                        } else {
+                                            currFolder[0] = "New Folder_description_\(currFolderDescription)"
+                                        }
+                                    } else {
+                                        if currFolderDescription.isEmpty {
+                                            currFolder[0] = currFolderName
+                                        } else {
+                                            currFolder[0] = "\(currFolderName)_description_\(currFolderDescription)"
+                                        }
+                                    }
                                     currCommunicationBoard[currFolderIndex] = currFolder
                                     saveCommunicationBoard(currCommunicationBoard)
                                 }
@@ -698,15 +734,30 @@ struct CommunicationBoardView: View {
                             currFolder = []
                             currFolderIndex = 0
                             currFolderName = ""
+                            currFolderDescription = ""
                         }) {
                             Text("\(Image(systemName: "xmark.circle.fill"))")
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.5)
                                 .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
                                 .foregroundStyle(.gray)
-                                .padding()
+                                .padding([.top, .trailing])
                         }
-                        
+                    }
+                    if (lockButtonsOn && !unlockButtons) || currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
+                        Text(currFolderDescription)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.01)
+                            .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
+                            .foregroundStyle(.gray)
+                    } else {
+                        TextField("Description...", text: $currFolderDescription, onEditingChanged: { editing in
+                            
+                        }, onCommit: {
+                        })
+                        .minimumScaleFactor(0.01)
+                        .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
+                        .foregroundStyle(.gray)
                     }
                     ScrollView(showsIndicators: false) {
                         if currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
@@ -746,7 +797,7 @@ struct CommunicationBoardView: View {
                                                     .accessibilityLabel(extractKey(from: currFolder[key]))
                                             }
                                         }
-                                        .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(.purple)))
+                                        .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(Color.accentColor)))
                                     }
                                 }
                             }
@@ -756,7 +807,8 @@ struct CommunicationBoardView: View {
                                     .minimumScaleFactor(0.01)
                                     .multilineTextAlignment(.center)
                                     .font(.system(size: horizontalSizeClass == .compact ? 15 : 30, weight: .bold, design: .rounded))
-                                    .foregroundStyle(.gray)
+                                    .foregroundStyle(Color.accentColor.opacity(0.5))
+                                    .padding()
                             } else {
                                 LazyVGrid(columns: [GridItem(.adaptive(minimum: horizontalSizeClass == .compact ? 75 : 130))], spacing: 0) {
                                     ForEach(1..<currFolder.count, id: \.self) { key in //first display custom icon results
@@ -870,7 +922,7 @@ struct CommunicationBoardView: View {
                                     Text("Add Icons \(Image(systemName: addFolderIcons ? "chevron.down" : "chevron.forward"))")
                                         .font(.system(size: horizontalSizeClass == .compact ? 17 : 25, weight: .bold, design: .rounded))
                                         .padding()
-                                        .foregroundStyle(.purple)
+                                        .foregroundStyle(Color.accentColor)
                                 }
                             }
                             if addFolderIcons {
@@ -900,7 +952,7 @@ struct CommunicationBoardView: View {
                                                                         Image(systemName: "plus.circle.fill")
                                                                             .resizable()
                                                                             .frame(width: horizontalSizeClass == .compact ? 30 : 40, height: horizontalSizeClass == .compact ? 30 : 40)
-                                                                            .foregroundStyle(.purple)
+                                                                            .foregroundStyle(Color.accentColor)
                                                                         Spacer()
                                                                     }
                                                                     Spacer()
@@ -931,7 +983,7 @@ struct CommunicationBoardView: View {
                                                                             Image(systemName: "plus.circle.fill")
                                                                                 .resizable()
                                                                                 .frame(width: horizontalSizeClass == .compact ? 30 : 40, height: horizontalSizeClass == .compact ? 30 : 40)
-                                                                                .foregroundStyle(.purple)
+                                                                                .foregroundStyle(Color.accentColor)
                                                                             Spacer()
                                                                         }
                                                                         Spacer()
@@ -961,7 +1013,7 @@ struct CommunicationBoardView: View {
 //
             if newFolder {
                 VStack {
-                    HStack {
+                    HStack(alignment: .bottom) {
                         if lockButtonsOn && !unlockButtons {
                             Text(currFolderName)
                                 .lineLimit(1)
@@ -973,9 +1025,17 @@ struct CommunicationBoardView: View {
                             }, onCommit: {
                                 if newFolder {
                                     if currFolderName.isEmpty {
-                                        currFolder[0] = "New Folder"
+                                        if currFolderDescription.isEmpty {
+                                            currFolder[0] = "New Folder"
+                                        } else {
+                                            currFolder[0] = "New Folder_description_\(currFolderDescription)"
+                                        }
                                     } else {
-                                        currFolder[0] = currFolderName
+                                        if currFolderDescription.isEmpty {
+                                            currFolder[0] = currFolderName
+                                        } else {
+                                            currFolder[0] = "\(currFolderName)_description_\(currFolderDescription)"
+                                        }
                                     }
                                     currCommunicationBoard[currFolderIndex] = currFolder
                                     saveCommunicationBoard(currCommunicationBoard)
@@ -994,7 +1054,19 @@ struct CommunicationBoardView: View {
                                     currCommunicationBoard.remove(at: currFolderIndex)
                                     saveCommunicationBoard(currCommunicationBoard)
                                 } else {
-                                    currFolder[0] = currFolderName
+                                    if currFolderName.isEmpty {
+                                        if currFolderDescription.isEmpty {
+                                            currFolder[0] = "New Folder"
+                                        } else {
+                                            currFolder[0] = "New Folder_description_\(currFolderDescription)"
+                                        }
+                                    } else {
+                                        if currFolderDescription.isEmpty {
+                                            currFolder[0] = currFolderName
+                                        } else {
+                                            currFolder[0] = "\(currFolderName)_description_\(currFolderDescription)"
+                                        }
+                                    }
                                     currCommunicationBoard[currFolderIndex] = currFolder
                                     saveCommunicationBoard(currCommunicationBoard)
                                 }
@@ -1005,6 +1077,7 @@ struct CommunicationBoardView: View {
                             currFolder = []
                             currFolderIndex = 0
                             currFolderName = ""
+                            currFolderDescription = ""
                             animate.toggle()
                         }) {
                             Text("\(Image(systemName: "xmark.circle.fill"))")
@@ -1012,9 +1085,24 @@ struct CommunicationBoardView: View {
                                 .minimumScaleFactor(0.5)
                                 .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
                                 .foregroundStyle(.gray)
-                                .padding()
+                                .padding([.top, .trailing])
                         }
                         
+                    }
+                    if (lockButtonsOn && !unlockButtons) || currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
+                        Text(currFolderDescription)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.01)
+                            .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
+                            .foregroundStyle(.gray)
+                    } else {
+                        TextField("Description...", text: $currFolderDescription, onEditingChanged: { editing in
+                            
+                        }, onCommit: {
+                        })
+                        .minimumScaleFactor(0.01)
+                        .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
+                        .foregroundStyle(.gray)
                     }
                     ScrollView(showsIndicators: false) {
                         if currFolder.filter({ !hiddenIcons.contains($0) }).count <= 1 {
@@ -1022,7 +1110,8 @@ struct CommunicationBoardView: View {
                                 .minimumScaleFactor(0.01)
                                 .multilineTextAlignment(.center)
                                 .font(.system(size: horizontalSizeClass == .compact ? 15 : 30, weight: .bold, design: .rounded))
-                                .foregroundStyle(.gray)
+                                .foregroundStyle(Color.accentColor.opacity(0.5))
+                                .padding()
                         } else {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: horizontalSizeClass == .compact ? 75 : 130))], spacing: 0) {
                                 ForEach(1..<currFolder.count, id: \.self) { key in
@@ -1124,7 +1213,7 @@ struct CommunicationBoardView: View {
                                             return NSItemProvider(item: nil, typeIdentifier: currFolder[key])
                                         })
                                         .onDrop(of: [UTType.text], delegate: TextDropDelegate(item: currFolder[key], items: $currFolder, draggedItem: $draggedItem))
-                                        .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(.purple)))
+                                        .transition(.asymmetric(insertion: .movingParts.iris(blurRadius: 50), removal: .movingParts.vanish(Color.accentColor)))
                                     }
                                 }
                             }
@@ -1155,7 +1244,7 @@ struct CommunicationBoardView: View {
                                                                 Image(systemName: "plus.circle.fill")
                                                                     .resizable()
                                                                     .frame(width: horizontalSizeClass == .compact ? 30 : 40, height: horizontalSizeClass == .compact ? 30 : 40)
-                                                                    .foregroundStyle(.purple)
+                                                                    .foregroundStyle(Color.accentColor)
                                                                 Spacer()
                                                             }
                                                             Spacer()
@@ -1186,7 +1275,7 @@ struct CommunicationBoardView: View {
                                                                     Image(systemName: "plus.circle.fill")
                                                                         .resizable()
                                                                         .frame(width: horizontalSizeClass == .compact ? 30 : 40, height: horizontalSizeClass == .compact ? 30 : 40)
-                                                                        .foregroundStyle(.purple)
+                                                                        .foregroundStyle(Color.accentColor)
                                                                     Spacer()
                                                                 }
                                                                 Spacer()
@@ -1222,7 +1311,7 @@ struct CommunicationBoardView: View {
                             Image(systemName: "play.square.fill")
                                 .resizable()
                                 .frame(width: horizontalSizeClass == .compact ? 50 : 100, height: horizontalSizeClass == .compact ? 50 : 100)
-                                .foregroundStyle(.purple)
+                                .foregroundStyle(Color.accentColor)
                                 .symbolRenderingMode(.hierarchical)
                                 .padding(.leading, 5)
                                 .accessibilityHint(Text("Plays your tapped icons."))
@@ -1304,10 +1393,11 @@ struct CommunicationBoardView: View {
                                         focusSearch = false
                                         animate.toggle()
                                     }) {
-                                        Image(systemName: "xmark.circle.fill")
+                                        Image(systemName: horizontalSizeClass == .compact ? "xmark.circle.fill" : "xmark.square.fill")
                                             .resizable()
                                             .frame(width: horizontalSizeClass == .compact ? 50 : 75, height: horizontalSizeClass == .compact ? 50 : 75)
-                                            .foregroundStyle(.gray)
+                                            .symbolRenderingMode(.palette)
+                                            .foregroundStyle(.gray, Color(.systemGray6))
                                     }
                                     TextField("\(Image(systemName: "magnifyingglass")) Search", text: $searchText)
                                         .focused($focusSearch)
@@ -1331,7 +1421,7 @@ struct CommunicationBoardView: View {
                                         speechDelegate.progress = 0.0
                                         animate.toggle()
                                     }) {
-                                        Image(systemName: "xmark.circle.fill")
+                                        Image(systemName: horizontalSizeClass == .compact ? "xmark.circle.fill" : "xmark.square.fill")
                                             .resizable()
                                             .frame(width: horizontalSizeClass == .compact ? 50 : 75, height: horizontalSizeClass == .compact ? 50 : 75)
                                             .foregroundStyle(.gray)
@@ -1346,7 +1436,7 @@ struct CommunicationBoardView: View {
                                         )
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 20)
-                                                .stroke(.purple, lineWidth: horizontalSizeClass == .compact ? 3 : 6)
+                                                .stroke(Color.accentColor, lineWidth: horizontalSizeClass == .compact ? 3 : 6)
                                         )
                                         .padding(.bottom, 2)
                                     
@@ -1369,7 +1459,7 @@ struct CommunicationBoardView: View {
                                         Image(systemName: speechDelegate.isSpeaking ? "stop.circle.fill" : "play.square.fill")
                                             .resizable()
                                             .frame(width: horizontalSizeClass == .compact ? 50 : 75, height: horizontalSizeClass == .compact ? 50 : 75)
-                                            .foregroundStyle(.purple)
+                                            .foregroundStyle(Color.accentColor)
                                             .symbolRenderingMode(.hierarchical)
                                     }
                                     if speechDelegate.progress < 1.0 && speechDelegate.progress > 0.0 {
@@ -1383,7 +1473,7 @@ struct CommunicationBoardView: View {
                                             Image(systemName: speechDelegate.isPaused ? "play.circle" : "pause.circle")
                                                 .resizable()
                                                 .frame(width: horizontalSizeClass == .compact ? 50 : 75, height: horizontalSizeClass == .compact ? 50 : 75)
-                                                .foregroundStyle(.purple)
+                                                .foregroundStyle(Color.accentColor)
                                                 .symbolRenderingMode(.hierarchical)
                                         }
                                         .transition(.opacity)
@@ -1501,6 +1591,7 @@ struct CommunicationBoardView: View {
                                             }
                                             currFolderIndex = 0
                                             currFolderName = ""
+                                            currFolderDescription = ""
                                             focusFolder = true
                                         }) {
                                             VStack {
@@ -1541,7 +1632,7 @@ struct CommunicationBoardView: View {
                                                     Image(systemName: "square.fill")
                                                         .resizable()
                                                         .frame(width: 65, height: 65)
-                                                        .foregroundStyle(.purple)
+                                                        .foregroundStyle(Color.accentColor)
                                                     Text("\(Image(systemName: "newspaper"))")
                                                         .font(.system(size: 30))
                                                         .foregroundStyle(Color(.systemBackground))
@@ -1669,6 +1760,7 @@ struct CommunicationBoardView: View {
                             .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
                             .foregroundStyle(.gray)
                             .padding()
+                            .symbolRenderingMode(.hierarchical)
                     } else {
                         Image(systemName:"checkmark.square.fill")
                             .resizable()
@@ -1745,6 +1837,7 @@ struct CommunicationBoardView: View {
         currFolder = []
         currFolderIndex = 0
         currFolderName = ""
+        currFolderDescription = ""
         newFolder = false
         addFolderIcons = false
         showCustom = false

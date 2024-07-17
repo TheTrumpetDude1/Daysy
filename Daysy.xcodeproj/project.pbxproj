@@ -698,6 +698,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Daysy uses the camera to take pictures for your Custom Icons";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Daysy uses FaceID for the Lock Buttons Setting";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Daysy uses the microhpone to record your voice for Custom Icons.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
@@ -740,6 +741,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Daysy uses the camera to take pictures for your Custom Icons";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Daysy uses FaceID for the Lock Buttons Setting";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Daysy uses the microhpone to record your voice for Custom Icons.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;

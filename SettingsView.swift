@@ -76,7 +76,7 @@ struct SettingsView: View {
         NavigationView {
             ZStack {
                 ScrollView(showsIndicators: false) {
-                    HStack {
+                    HStack(alignment: horizontalSizeClass == .compact ? .top : .center) {
                         Text("\(Image(systemName: "gear")) Settings")
                             .lineLimit(1)
                             .minimumScaleFactor(0.01)
@@ -91,7 +91,8 @@ struct SettingsView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
                                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                                    .foregroundStyle(Color(.systemGray3))
+                                    .foregroundStyle(.gray)
+                                    .symbolRenderingMode(.hierarchical)
                             }
                         }
                     }
@@ -104,7 +105,7 @@ struct SettingsView: View {
                      Image(systemName: "brain.filled.head.profile")
                      .minimumScaleFactor(0.5)
                      .font(.system(size: horizontalSizeClass == .compact ? 25 : 40, weight: .bold, design: .rounded))
-                     .foregroundStyle(.purple)
+                     .foregroundStyle(Color.accentColor)
                      .symbolRenderingMode(.hierarchical)
                      Text(" OpenAI Features")
                      .lineLimit(1)
@@ -118,7 +119,7 @@ struct SettingsView: View {
                      ZStack {
                      Capsule()
                      .frame(width: horizontalSizeClass == .compact ? 80 : 160,height: horizontalSizeClass == .compact ? 44 : 88)
-                     .foregroundStyle(aiOn ? .purple : Color(.systemGray3))
+                     .foregroundStyle(aiOn ? Color.accentColor : Color(.systemGray3))
                      ZStack{
                      Circle()
                      .frame(width: horizontalSizeClass == .compact ? 40 : 80, height: horizontalSizeClass == .compact ? 40 : 80)
@@ -413,7 +414,7 @@ struct SettingsView: View {
                             ZStack {
                                 Image(systemName: "app.fill")
                                     .resizable()
-                                    .foregroundStyle(.purple)
+                                    .foregroundStyle(Color.accentColor)
                                     .scaledToFit()
                                 VStack {
                                     ZStack {
@@ -569,7 +570,7 @@ struct SettingsView: View {
                                                 .font(.system(size: horizontalSizeClass == .compact ? 20 : 25, weight: .bold, design: .rounded))
                                                 .lineLimit(1)
                                                 .padding([.top, .bottom, .leading], horizontalSizeClass == .compact ? 5 : 10)
-                                                .foregroundStyle(.purple)
+                                                .foregroundStyle(Color.accentColor)
                                                 .symbolRenderingMode(.hierarchical)
                                         }
                                         Text("Feedback")
@@ -674,7 +675,8 @@ struct SettingsView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
                                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                                    .foregroundStyle(loadSheetArray().count > 1 ? Color(.systemGray3): Color(.systemGray6))
+                                    .foregroundStyle(.gray)
+                                    .symbolRenderingMode(.hierarchical)
                                     .padding([.top, .trailing])
                             }
                         }
@@ -750,7 +752,8 @@ struct SettingsView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
                                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                                    .foregroundStyle(loadSheetArray().count > 1 ? Color(.systemGray3): Color(.systemGray6))
+                                    .foregroundStyle(.gray)
+                                    .symbolRenderingMode(.hierarchical)
                                     .padding([.top, .trailing])
                             }
                         }
@@ -857,7 +860,7 @@ struct SettingsView: View {
                                                 Image(systemName: "square.fill")
                                                     .resizable()
                                                     .frame(width: 65, height: 65)
-                                                    .foregroundStyle(.purple)
+                                                    .foregroundStyle(Color.accentColor)
                                                 Image(systemName: "square.grid.2x2")
                                                     .resizable()
                                                     .frame(width: min(30, 75), height: min(30, 75))
@@ -940,7 +943,7 @@ struct SettingsView: View {
                                         Image(systemName: "square.fill")
                                             .resizable()
                                             .frame(width: 75, height: 75)
-                                            .foregroundStyle(.purple)
+                                            .foregroundStyle(Color.accentColor)
                                         Image(systemName: "square.grid.2x2")
                                             .resizable()
                                             .frame(width: min(40, 100), height: min(40, 100))
@@ -1015,7 +1018,8 @@ struct SettingsView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
                                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                                    .foregroundStyle(loadSheetArray().count > 1 ? Color(.systemGray3): Color(.systemGray6))
+                                    .foregroundStyle(.gray)
+                                    .symbolRenderingMode(.hierarchical)
                                     .padding([.top, .trailing])
                             }
                         }
@@ -1037,7 +1041,7 @@ struct SettingsView: View {
                         //                                }) {
                         //                                    ZStack {
                         //                                        RoundedRectangle(cornerRadius: 10)
-                        //                                            .fill(currAiVoice == voice ? .purple : Color(.systemGray5))
+                        //                                            .fill(currAiVoice == voice ? Color.accentColor : Color(.systemGray5))
                         //                                            .aspectRatio(2, contentMode: .fit)
                         //                                        HStack {
                         //                                            if currAiVoice == voice  {
@@ -1073,7 +1077,7 @@ struct SettingsView: View {
                             }) {
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 10)
-                                        .fill(currVoice == item[2] ? .purple : Color(.systemGray5))
+                                        .fill(currVoice == item[2] ? Color.accentColor : Color(.systemGray5))
                                         .aspectRatio(2, contentMode: .fit)
                                     HStack {
                                         if currVoice == item[2] {
@@ -1124,7 +1128,7 @@ struct SettingsView: View {
                                 }) {
                                     ZStack {
                                         RoundedRectangle(cornerRadius: 10)
-                                            .fill(currVoiceRatio == Double(value) ? .purple : Color(.systemGray5))
+                                            .fill(currVoiceRatio == Double(value) ? Color.accentColor : Color(.systemGray5))
                                             .aspectRatio(2, contentMode: .fit)
                                         HStack {
                                             if currVoiceRatio == Double(value) {
@@ -1180,7 +1184,8 @@ struct SettingsView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
                                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                                    .foregroundStyle(loadSheetArray().count > 1 ? Color(.systemGray3): Color(.systemGray6))
+                                    .foregroundStyle(.gray)
+                                    .symbolRenderingMode(.hierarchical)
                                     .padding([.top, .trailing])
                             }
                         }
@@ -1426,12 +1431,12 @@ struct SettingsView: View {
                                 .minimumScaleFactor(0.01)
                                 .font(.system(size: 50, weight: .bold, design: .rounded))
                                 .padding()
-                                .foregroundStyle(.purple)
+                                .foregroundStyle(Color.accentColor)
                                 .opacity(0.4)
                             Text("Interactive Graphics and more details are coming soon!")
                                 .minimumScaleFactor(0.01)
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                                .foregroundStyle(.purple)
+                                .foregroundStyle(Color.accentColor)
                                 .multilineTextAlignment(.center)
                         }
                         .padding()
@@ -1466,7 +1471,8 @@ struct SettingsView: View {
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
                                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                                    .foregroundStyle(loadSheetArray().count > 1 ? Color(.systemGray3): Color(.systemGray6))
+                                    .foregroundStyle(.gray)
+                                    .symbolRenderingMode(.hierarchical)
                                     .padding([.top, .trailing])
                             }
                         }

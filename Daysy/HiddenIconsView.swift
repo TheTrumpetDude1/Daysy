@@ -79,14 +79,14 @@ struct HiddenIconsView: View {
                                                     .resizable()
                                                     .scaledToFit()
                                                     .symbolRenderingMode(.hierarchical)
-                                                    .foregroundStyle(.purple)
+                                                    .foregroundStyle(Color.accentColor)
                                                     .padding()
                                                     .opacity(selectedIndex == index ? 0.85 : 0)
                                                 Text("Restore")
                                                     .lineLimit(1)
                                                     .minimumScaleFactor(0.1)
                                                     .font(.system(size: horizontalSizeClass == .compact ? 25 : 40, weight: .bold, design: .rounded))
-                                                    .foregroundStyle(.purple)
+                                                    .foregroundStyle(Color.accentColor)
                                                     .opacity(selectedIndex == index ? 0.85 : 0)
                                             }
                                         }

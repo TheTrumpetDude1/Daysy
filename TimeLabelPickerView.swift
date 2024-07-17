@@ -62,7 +62,7 @@ struct TimePickerView: View {
                     Image(systemName:"xmark.square.fill")
                         .resizable()
                         .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                    
+                        .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(.gray)
                         .padding()
                 } else {
@@ -119,7 +119,7 @@ struct LabelPickerView: View {
                                     RoundedRectangle(cornerRadius: 10)
                                         .fill(Color(.systemGray5))
                                 )
-                                .foregroundStyle(.purple)
+                                .foregroundStyle(Color.accentColor)
                         }
                     }
                 }
@@ -144,6 +144,7 @@ struct LabelPickerView: View {
                         .resizable()
                         .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
                         .foregroundStyle(.gray)
+                        .symbolRenderingMode(.hierarchical)
                         .padding()
                 } else {
                     Image(systemName:"checkmark.square.fill")

@@ -44,7 +44,7 @@ struct CanvasView: View {
                     })
             )
             HStack {
-                ForEach([Color.green, .orange, .blue, .red, .pink, .primary, .purple, Color(.systemBackground)], id: \.self) { color in
+                ForEach([Color.green, .orange, .blue, .red, .pink, .primary, Color.accentColor, Color(.systemBackground)], id: \.self) { color in
                     colorButton(color: color)
                 }
                 Button {
@@ -53,6 +53,7 @@ struct CanvasView: View {
                     Image(systemName: "xmark.circle.fill")
                         .font(.largeTitle)
                         .foregroundStyle(.gray)
+                        .symbolRenderingMode(.hierarchical)
                 }
             }
         }

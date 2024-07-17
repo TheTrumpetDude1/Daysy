@@ -361,7 +361,8 @@ struct StatisticsView: View {
                                             .lineLimit(1)
                                             .minimumScaleFactor(0.5)
                                             .font(.system(size: 30, weight: .bold, design: .rounded))
-                                            .foregroundStyle(Color(.systemGray3))
+                                            .foregroundStyle(.gray)
+                                            .symbolRenderingMode(.hierarchical)
                                     }
                                 }
                             }
@@ -400,7 +401,8 @@ struct StatisticsView: View {
                                             .lineLimit(1)
                                             .minimumScaleFactor(0.5)
                                             .font(.system(size: 30, weight: .bold, design: .rounded))
-                                            .foregroundStyle(Color(.systemGray3))
+                                            .foregroundStyle(.gray)
+                                            .symbolRenderingMode(.hierarchical)
                                     }
                                 }
                             }
@@ -439,7 +441,8 @@ struct StatisticsView: View {
                                             .lineLimit(1)
                                             .minimumScaleFactor(0.5)
                                             .font(.system(size: 30, weight: .bold, design: .rounded))
-                                            .foregroundStyle(Color(.systemGray3))
+                                            .foregroundStyle(.gray)
+                                            .symbolRenderingMode(.hierarchical)
                                     }
                                 }
                             }
@@ -476,7 +479,8 @@ struct StatisticsView: View {
                                             .lineLimit(1)
                                             .minimumScaleFactor(0.5)
                                             .font(.system(size: 30, weight: .bold, design: .rounded))
-                                            .foregroundStyle(Color(.systemGray3))
+                                            .foregroundStyle(.gray)
+                                            .symbolRenderingMode(.hierarchical)
                                     }
                                 }
                             }
@@ -695,7 +699,7 @@ struct UsageDetailView: View {
                     Text("\(usageData[currUserIndex].app_version ?? "?") (\(usageData[currUserIndex].bundle_version ?? "?"))")
                         .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
                         .lineLimit(1)
-                        .foregroundStyle(.purple)
+                        .foregroundStyle(Color.accentColor)
                 }
                 if horizontalSizeClass == .compact {
                     Spacer()
@@ -706,7 +710,8 @@ struct UsageDetailView: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
                             .font(.system(size: 30, weight: .bold, design: .rounded))
-                            .foregroundStyle(Color(.systemGray3))
+                            .foregroundStyle(.gray)
+                            .symbolRenderingMode(.hierarchical)
                     }
                 }
             }
@@ -860,7 +865,7 @@ struct UsageDetailView: View {
                     .chartYAxis {
                         AxisMarks(values: .automatic(desiredCount: 2))
                     }
-                    .foregroundStyle(.purple)
+                    .foregroundStyle(Color.accentColor)
                     .frame(height: 400)
                     .padding()
                 }

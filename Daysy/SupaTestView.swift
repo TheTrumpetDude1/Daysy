@@ -44,7 +44,7 @@ struct SupaTestView: View {
                     .opacity(isLoading ? 1.0 : 0.0)
                 Text("Accounts")
                     .font(.system(size: 30, weight: .bold, design: .rounded))
-                    .foregroundStyle(isLoading ? .gray : .purple)
+                    .foregroundStyle(isLoading ? .gray : Color.accentColor)
                     .symbolRenderingMode(.hierarchical)
                 Spacer()
             }
@@ -56,7 +56,7 @@ struct SupaTestView: View {
             ScrollView {
                 if accounts.isEmpty {
                     if isLoading {
-                        LoadingIndicator(color: .purple)
+                        LoadingIndicator(color: Color.accentColor)
                     } else {
                         Text("there are no accounts, add an account from the button below")
                             .font(.headline)
@@ -73,7 +73,7 @@ struct SupaTestView: View {
                                         Text("(\(accounts[accountIndex].user_name))")
                                             .font(.headline)
                                             .lineLimit(1)
-                                            .foregroundStyle(.purple)
+                                            .foregroundStyle(Color.accentColor)
                                         
                                     }
                                     Text("\(getBackupTime(accounts[accountIndex].created_at!))")
