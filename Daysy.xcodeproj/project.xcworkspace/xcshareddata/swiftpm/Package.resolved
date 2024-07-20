@@ -1,5 +1,5 @@
 {
-  "originHash" : "e156112b590b6711984015196da443abb7556a78120696d77a29460c2d025ff4",
+  "originHash" : "0dfb9d3a0f692301316b52ed38f49d7ecb783f12d19af85fa5712b7e65024cef",
   "pins" : [
     {
       "identity" : "openai",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "f0d0f3e72d42beaf2b01f1cb798e1b55902814eb",
         "version" : "1.0.4"
+      }
+    },
+    {
+      "identity" : "slideovercard",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/joogps/SlideOverCard.git",
+      "state" : {
+        "revision" : "e38be074ab7a5b46d0a18f550bf94972a0f582c6",
+        "version" : "3.0.1"
       }
     },
     {

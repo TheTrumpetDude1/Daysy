@@ -38,6 +38,7 @@
 		D4ADEDF62BE4360E0039FA48 /* PrivateKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4ADEDF52BE4360E0039FA48 /* PrivateKeys.swift */; };
 		D4B94CF42C2DA45400992E6A /* FaceMeshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B94CF32C2DA45400992E6A /* FaceMeshView.swift */; };
 		D4B94CF62C2DA5BB00992E6A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4B94CF52C2DA5BB00992E6A /* Main.storyboard */; };
+		D4E0C5AF2C484817005B3883 /* SlideOverCard in Frameworks */ = {isa = PBXBuildFile; productRef = D4E0C5AE2C484817005B3883 /* SlideOverCard */; };
 		D4E696242AE1A097004AEF99 /* DaysyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E696232AE1A097004AEF99 /* DaysyApp.swift */; };
 		D4E696262AE1A097004AEF99 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E696252AE1A097004AEF99 /* ContentView.swift */; };
 		D4E6962B2AE1A09C004AEF99 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4E6962A2AE1A09C004AEF99 /* Preview Assets.xcassets */; };
@@ -170,6 +171,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D40ABA252C0E14D30056C5EB /* Pow in Frameworks */,
+				D4E0C5AF2C484817005B3883 /* SlideOverCard in Frameworks */,
 				D49782772C0F5582009440D5 /* OpenAI in Frameworks */,
 				D49CAE972C3C308500EEFCBC /* Storage in Frameworks */,
 				D49CAE912C3C308500EEFCBC /* Functions in Frameworks */,
@@ -352,6 +354,7 @@
 				D49CAE942C3C308500EEFCBC /* Realtime */,
 				D49CAE962C3C308500EEFCBC /* Storage */,
 				D49CAE982C3C30A200EEFCBC /* Supabase */,
+				D4E0C5AE2C484817005B3883 /* SlideOverCard */,
 			);
 			productName = Daysy;
 			productReference = D4E696202AE1A097004AEF99 /* Daysy.app */;
@@ -429,6 +432,7 @@
 				D40ABA232C0E14D30056C5EB /* XCRemoteSwiftPackageReference "Pow" */,
 				D49782752C0F5582009440D5 /* XCRemoteSwiftPackageReference "OpenAI" */,
 				D49CAE8D2C3C308500EEFCBC /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				D4E0C5AD2C484817005B3883 /* XCRemoteSwiftPackageReference "SlideOverCard" */,
 			);
 			productRefGroup = D4E696212AE1A097004AEF99 /* Products */;
 			projectDirPath = "";
@@ -701,6 +705,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Daysy uses the microhpone to record your voice for Custom Icons.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
@@ -711,7 +716,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2;
+				MARKETING_VERSION = 3.3;
 				PRODUCT_BUNDLE_IDENTIFIER = Alex.Daysy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				RUN_CLANG_STATIC_ANALYZER = NO;
@@ -744,6 +749,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Daysy uses the microhpone to record your voice for Custom Icons.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
@@ -754,7 +760,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.2;
+				MARKETING_VERSION = 3.3;
 				PRODUCT_BUNDLE_IDENTIFIER = Alex.Daysy;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				RUN_CLANG_STATIC_ANALYZER = NO;
@@ -904,6 +910,14 @@
 				minimumVersion = 2.5.1;
 			};
 		};
+		D4E0C5AD2C484817005B3883 /* XCRemoteSwiftPackageReference "SlideOverCard" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/joogps/SlideOverCard.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -946,6 +960,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D49CAE8D2C3C308500EEFCBC /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		D4E0C5AE2C484817005B3883 /* SlideOverCard */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D4E0C5AD2C484817005B3883 /* XCRemoteSwiftPackageReference "SlideOverCard" */;
+			productName = SlideOverCard;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -650,12 +650,13 @@ func detectLanguage(for text: String) -> String {
 func updateSuggestedWords(currLabel: String) -> [String] {
     // Initialize a UITextChecker instance
     let textChecker = UITextChecker()
+    let lastWord: String = currLabel.components(separatedBy: " ").last ?? ""
     
     // Get range of text checked by UITextChecker
-    let textRange = NSRange(location: 0, length: currLabel.utf16.count)
+    let textRange = NSRange(location: 0, length: lastWord.utf16.count)
     
     // Get completions for the current search text
-    let completions = textChecker.completions(forPartialWordRange: textRange, in: currLabel, language: detectLanguage(for: currLabel))
+    let completions = textChecker.completions(forPartialWordRange: textRange, in: lastWord, language: "en")
     
     // If completions are found, update the suggestedWords array
     if let completions = completions {
