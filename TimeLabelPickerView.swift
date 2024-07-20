@@ -64,19 +64,19 @@ struct TimePickerView: View {
             .frame(width: 400, height: 400)
             .scaleEffect(horizontalSizeClass == .compact ? 1.5 : 3)
         Spacer()
-        if currDate != oldDate {
-            Button(action: {
+        Button(action: {
+            if currDate != oldDate {
                 saveTime(currDate)
-                
-                self.presentation.wrappedValue.dismiss()
-            }) {
-                Image(systemName: currDate != oldDate ? "xmark.square.fill" : "checkmark.square.fill")
-                    .resizable()
-                    .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                    .foregroundStyle(currDate != oldDate ? .gray : .green)
-                    .symbolRenderingMode(.hierarchical)
-                    .padding()
             }
+            
+            self.presentation.wrappedValue.dismiss()
+        }) {
+            Image(systemName: currDate != oldDate ? "checkmark.square.fill" : "xmark.square.fill")
+                .resizable()
+                .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                .foregroundStyle(currDate != oldDate ? .gray : .green)
+                .symbolRenderingMode(.hierarchical)
+                .padding()
         }
     }
 }
@@ -140,22 +140,20 @@ struct LabelPickerView: View {
                 }
             }
             Spacer()
-            if !currLabel.isEmpty && currLabel != oldLabel {
-                Button(action: {
-                    if currLabel.isEmpty || currLabel == oldLabel {
-                        self.presentation.wrappedValue.dismiss()
-                    } else {
-                        saveLabel(currLabel)
-                        self.presentation.wrappedValue.dismiss()
-                    }
-                }) {
-                    Image(systemName: currLabel.isEmpty || currLabel == oldLabel ? "xmark.square.fill" : "checkmark.square.fill")
-                        .resizable()
-                        .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                        .foregroundStyle(currLabel.isEmpty || currLabel == oldLabel ? .gray : .green)
-                        .symbolRenderingMode(.hierarchical)
-                        .padding()
+            Button(action: {
+                if currLabel.isEmpty || currLabel == oldLabel {
+                    self.presentation.wrappedValue.dismiss()
+                } else {
+                    saveLabel(currLabel)
+                    self.presentation.wrappedValue.dismiss()
                 }
+            }) {
+                Image(systemName: currLabel.isEmpty || currLabel == oldLabel ? "xmark.square.fill" : "checkmark.square.fill")
+                    .resizable()
+                    .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                    .foregroundStyle(currLabel.isEmpty || currLabel == oldLabel ? .green : .gray)
+                    .symbolRenderingMode(.hierarchical)
+                    .padding()
             }
         }
         .ignoresSafeArea(.keyboard)

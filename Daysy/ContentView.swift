@@ -940,7 +940,7 @@ struct ContentView: View {
                                                                     .padding()
                                                                     .minimumScaleFactor(0.1)
                                                                     .lineLimit(1)
-                                                                    .font(.system(size: 75, weight: .bold, design: .rounded))
+                                                                    .font(.system(size: 65, weight: .bold, design: .rounded))
                                                                     .foregroundStyle(.red)
                                                                     .background(.red.opacity(0.3))
                                                                     .cornerRadius(12)
