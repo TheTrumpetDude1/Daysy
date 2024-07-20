@@ -650,12 +650,13 @@ func detectLanguage(for text: String) -> String {
 func updateSuggestedWords(currLabel: String) -> [String] {
     // Initialize a UITextChecker instance
     let textChecker = UITextChecker()
+    let lastWord: String = currLabel.components(separatedBy: " ").last ?? ""
     
     // Get range of text checked by UITextChecker
-    let textRange = NSRange(location: 0, length: currLabel.utf16.count)
+    let textRange = NSRange(location: 0, length: lastWord.utf16.count)
     
     // Get completions for the current search text
-    let completions = textChecker.completions(forPartialWordRange: textRange, in: currLabel, language: detectLanguage(for: currLabel))
+    let completions = textChecker.completions(forPartialWordRange: textRange, in: lastWord, language: "en")
     
     // If completions are found, update the suggestedWords array
     if let completions = completions {
@@ -945,17 +946,23 @@ func getCustomIconPreviews() async -> [String: UIImage] {
     var customIconPreviews: [String: UIImage] = [:]
     let queue = DispatchQueue(label: "com.customIconPreviews.queue")
     
-    await withTaskGroup(of: (String, UIImage).self) { group in
+    await withTaskGroup(of: (String, UIImage?).self) { group in
         for (key, _) in customPECSAddresses {
             group.addTask {
-                let image = await getCustomIcon(key).asImage()
-                return (key, image)
+                await withCheckedContinuation { continuation in
+                    DispatchQueue.main.async {
+                        let image = getCustomIcon(key).asImage()
+                        continuation.resume(returning: (key, image))
+                    }
+                }
             }
         }
         
         for await (key, image) in group {
-            queue.sync {
-                customIconPreviews[key] = image
+            if let image = image {
+                queue.sync {
+                    customIconPreviews[key] = image
+                }
             }
         }
     }

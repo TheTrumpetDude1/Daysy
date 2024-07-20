@@ -239,102 +239,105 @@ struct UsageData: Codable, Identifiable {
     }
 }
 
-import SwiftUI
-import AVFoundation
-
-class AudioRecorder: NSObject, ObservableObject, AVAudioRecorderDelegate, AVAudioPlayerDelegate {
-    @Published var isRecording = false
-    @Published var isPlaying = false
-    @Published var audioFilename: URL?
-    
-    var audioRecorder: AVAudioRecorder?
-    var audioPlayer: AVAudioPlayer?
-    
-    let documentsURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    
-    override init() {
-        super.init()
-        setupAudioSession()
-    }
-    
-    func setupAudioSession() {
-        let audioSession = AVAudioSession.sharedInstance()
-        do {
-            try audioSession.setCategory(.playAndRecord, options: [.duckOthers])
-            try audioSession.setActive(true)
-        } catch {
-            print("Failed to set up audio session: \(error.localizedDescription)")
+struct AudioVisualizerView: View {
+    @Binding var microphone: Bool
+    @ObservedObject private var mic = MicrophoneMonitor(numberOfSamples: 5)
+    var body: some View {
+        VStack {
+            HStack(spacing: 4) {
+                ForEach(mic.soundSamples, id: \.self) { level in
+                    AudioBarView(microphone: $microphone, value: self.normalizeSoundLevel(level: level), numberOfSamples: 5)
+                }
+            }
         }
     }
-    
-    func startRecording() {
-        let filename = UUID().uuidString + ".m4a"
-        let fileURL = documentsURL.appendingPathComponent(filename)
-        audioFilename = fileURL
+    private func normalizeSoundLevel(level: Float) -> CGFloat {
+        let level = max(0.2, CGFloat(level) + 50) / 2 // between 0.1 and 25
         
-        let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 44100,
-            AVNumberOfChannelsKey: 2,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        return CGFloat(level * (300 / 25)) // scaled to max at 300 (our height of our bar)
+    }
+}
+
+struct AudioBarView: View {
+    @Binding var microphone: Bool
+    var value: CGFloat
+    var numberOfSamples: Int
+    
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 20)
+//                .fill(LinearGradient(gradient: Gradient(colors: [.purple, Color(.systemBackground), .purple]),
+//                                     startPoint: .top,
+//                                     endPoint: .bottom))
+                .fill(.purple)
+                .frame(width: (UIScreen.main.bounds.width - CGFloat(numberOfSamples) * 4) / CGFloat(numberOfSamples), height: microphone ? value : 5)
+        }
+    }
+}
+
+class MicrophoneMonitor: ObservableObject {
+    
+    // 1
+    private var audioRecorder: AVAudioRecorder
+    private var timer: Timer?
+    
+    private var currentSample: Int
+    private let numberOfSamples: Int
+    
+    // 2
+    @Published public var soundSamples: [Float]
+    
+    init(numberOfSamples: Int) {
+        self.numberOfSamples = numberOfSamples // In production check this is > 0.
+        self.soundSamples = [Float](repeating: .zero, count: numberOfSamples)
+        self.currentSample = 0
+        
+        // 3
+        let audioSession = AVAudioSession.sharedInstance()
+        if audioSession.recordPermission != .granted {
+            audioSession.requestRecordPermission { (isGranted) in
+                if !isGranted {
+                    fatalError("You must allow audio recording for this demo to work")
+                }
+            }
+        }
+        
+        // 4
+        let url = URL(fileURLWithPath: "/dev/null", isDirectory: true)
+        let recorderSettings: [String:Any] = [
+            AVFormatIDKey: NSNumber(value: kAudioFormatAppleLossless),
+            AVSampleRateKey: 44100.0,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderAudioQualityKey: AVAudioQuality.min.rawValue
         ]
         
+        // 5
         do {
-            audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
-            audioRecorder?.delegate = self
-            audioRecorder?.record()
-            isRecording = true
+            audioRecorder = try AVAudioRecorder(url: url, settings: recorderSettings)
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [])
+            
+            startMonitoring()
         } catch {
-            print("Failed to start recording: \(error.localizedDescription)")
+            fatalError(error.localizedDescription)
         }
     }
     
-    func stopRecording() {
-        audioRecorder?.stop()
-        isRecording = false
+    // 6
+    private func startMonitoring() {
+        audioRecorder.isMeteringEnabled = true
+        audioRecorder.record()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true, block: { (timer) in
+            // 7
+            self.audioRecorder.updateMeters()
+            self.soundSamples[self.currentSample] = self.audioRecorder.averagePower(forChannel: 0)
+            self.currentSample = (self.currentSample + 1) % self.numberOfSamples
+        })
     }
     
-    func playRecording() {
-        guard let fileURL = audioFilename else {
-            print("Audio file URL is nil.")
-            return
-        }
-        print("playing recording \(fileURL.lastPathComponent) (\(fileURL)")
-        do {
-            audioPlayer = try AVAudioPlayer(contentsOf: fileURL)
-            audioPlayer?.delegate = self
-            audioPlayer?.play()
-            isPlaying = true
-        } catch {
-            print("Failed to play recording: \(error.localizedDescription)")
-        }
-    }
-    
-    func stopPlaying() {
-        audioPlayer?.stop()
-        isPlaying = false
-    }
-    
-    func deleteRecording() {
-        guard let fileURL = audioFilename else {
-            print("Audio file URL is nil.")
-            return
-        }
-        
-        do {
-            try FileManager.default.removeItem(at: fileURL)
-            audioFilename = nil
-        } catch {
-            print("Failed to delete recording: \(error.localizedDescription)")
-        }
-    }
-    
-    func saveRecording() -> String? {
-        guard let fileURL = audioFilename else {
-            print("Audio file URL is nil.")
-            return nil
-        }
-        return fileURL.lastPathComponent
+    // 8
+    deinit {
+        timer?.invalidate()
+        audioRecorder.stop()
     }
 }
 
@@ -924,6 +927,11 @@ class SpeechSynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, Observab
         progress = 1.0
         isSpeaking = false
         isPaused = false
+        do {
+            try audioSession.setActive(false)
+        } catch {
+            currSessionLog.append("Error deactivating audio session: \(error)")
+        }
     }
     
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
@@ -939,6 +947,11 @@ class SpeechSynthesizerDelegate: NSObject, AVSpeechSynthesizerDelegate, Observab
         progress = 0.0
         isSpeaking = false
         isPaused = false
+        do {
+            try audioSession.setActive(false)
+        } catch {
+            currSessionLog.append("Error deactivating audio session: \(error)")
+        }
     }
     
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {

@@ -10,6 +10,7 @@
 import SwiftUI
 import Foundation
 import Pow
+import SlideOverCard
 
 struct WelcomeView: View { //main welcome page
     
@@ -676,7 +677,7 @@ struct ButtonView: View {
                                                 .resizable()
                                                 .frame(width: 65, height: 65)
                                                 .foregroundStyle(.green)
-                                            Text("\(Image(systemName: "plus.viewfinder"))")
+                                            Text("\(Image(systemName: "plus"))")
                                                 .font(.system(size: 30))
                                                 .foregroundStyle(Color(.systemBackground))
                                                 .symbolRenderingMode(.hierarchical)
@@ -1310,14 +1311,14 @@ struct TryItView: View { //interactive little mini sheet to play with
                 tutorialMode: true)
 
             }
-            .sheet(isPresented: $showTime) {
+            .slideOverCard(isPresented: $showTime) {
                 TimeLabelPickerView(viewType: .time, saveItem: { item in
                     if item is Date {
                         currTime = getTime(date: item as!Date)
                     }
                 }, oldDate: Date(), oldLabel: $currLabel)
             }
-            .sheet(isPresented: $showLabels) {
+            .slideOverCard(isPresented: $showLabels) {
                 TimeLabelPickerView(viewType: .label, saveItem: { item in
                     if item is String {
                         currLabel = item as!String

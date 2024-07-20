@@ -44,6 +44,19 @@ struct TimePickerView: View {
     var oldDate = Date()
     
     var body: some View {
+        if horizontalSizeClass == .compact {
+            Spacer()
+            Button(action: {
+                self.presentation.wrappedValue.dismiss()
+            }) {
+                Text("\(Image(systemName: "xmark.circle.fill"))")
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .foregroundStyle(.gray)
+                    .symbolRenderingMode(.hierarchical)
+            }
+        }
         Spacer()
         DatePicker("", selection: $currDate, displayedComponents: .hourAndMinute)
             .datePickerStyle(WheelDatePickerStyle())
@@ -51,28 +64,18 @@ struct TimePickerView: View {
             .frame(width: 400, height: 400)
             .scaleEffect(horizontalSizeClass == .compact ? 1.5 : 3)
         Spacer()
-        HStack {
+        if currDate != oldDate {
             Button(action: {
-                if currDate != oldDate {
-                    saveTime(currDate)
-                }
+                saveTime(currDate)
+                
                 self.presentation.wrappedValue.dismiss()
             }) {
-                if currDate == oldDate {
-                    Image(systemName:"xmark.square.fill")
-                        .resizable()
-                        .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(.gray)
-                        .padding()
-                } else {
-                    Image(systemName:"checkmark.square.fill")
-                        .resizable()
-                        .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                    
-                        .foregroundStyle(.green)
-                        .padding()
-                }
+                Image(systemName: currDate != oldDate ? "xmark.square.fill" : "checkmark.square.fill")
+                    .resizable()
+                    .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+                    .foregroundStyle(currDate != oldDate ? .gray : .green)
+                    .symbolRenderingMode(.hierarchical)
+                    .padding()
             }
         }
     }
@@ -110,7 +113,13 @@ struct LabelPickerView: View {
                 HStack {
                     ForEach(suggestedWords.prefix(horizontalSizeClass == .compact ? 10 : 20), id: \.self) { word in
                         Button(action: {
-                            currLabel = word
+                            let words = currLabel.split(separator: " ")
+                            if var lastWord = words.last {
+                                lastWord = Substring(word)
+                                currLabel = words.dropLast().joined(separator: " ") + " " + lastWord
+                            } else {
+                                currLabel = word
+                            }
                         }) {
                             Text(word)
                                 .font(.system(size: horizontalSizeClass == .compact ? 15 : 30, weight: .medium, design: .rounded))
@@ -131,26 +140,20 @@ struct LabelPickerView: View {
                 }
             }
             Spacer()
-            Button(action: {
-                if currLabel.isEmpty || currLabel == oldLabel {
-                    self.presentation.wrappedValue.dismiss()
-                } else {
-                    saveLabel(currLabel)
-                    self.presentation.wrappedValue.dismiss()
-                }
-            }) {
-                if currLabel.isEmpty || currLabel == oldLabel {
-                    Image(systemName:"xmark.square.fill")
+            if !currLabel.isEmpty && currLabel != oldLabel {
+                Button(action: {
+                    if currLabel.isEmpty || currLabel == oldLabel {
+                        self.presentation.wrappedValue.dismiss()
+                    } else {
+                        saveLabel(currLabel)
+                        self.presentation.wrappedValue.dismiss()
+                    }
+                }) {
+                    Image(systemName: currLabel.isEmpty || currLabel == oldLabel ? "xmark.square.fill" : "checkmark.square.fill")
                         .resizable()
                         .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                        .foregroundStyle(.gray)
+                        .foregroundStyle(currLabel.isEmpty || currLabel == oldLabel ? .gray : .green)
                         .symbolRenderingMode(.hierarchical)
-                        .padding()
-                } else {
-                    Image(systemName:"checkmark.square.fill")
-                        .resizable()
-                        .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                        .foregroundStyle(.green)
                         .padding()
                 }
             }

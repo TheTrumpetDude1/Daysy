@@ -200,17 +200,16 @@ struct AllIconsPickerView: View {
                                     showCustom.toggle()
                                 }) {
                                     VStack {
-                                        Image(systemName: "square.badge.plus.fill")
+                                        Image(systemName: "plus.square.fill")
                                             .resizable()
                                             .scaledToFill()
                                             .symbolRenderingMode(.hierarchical)
-                                            .padding([.top, .trailing])
-//                                        Text("Create Icon")
-//                                            .minimumScaleFactor(0.1)
-//                                            .lineLimit(1)
-//                                            .font(.system(size: horizontalSizeClass == .compact ? 20 : 40, weight: .bold, design: .rounded))
-//                                            .padding(.leading)
+                                        Text("Create Icon")
+                                            .minimumScaleFactor(0.1)
+                                            .lineLimit(1)
+                                            .font(.system(size: horizontalSizeClass == .compact ? 20 : 40, weight: .bold, design: .rounded))
                                     }
+                                    .padding()
                                 }
                                 .foregroundStyle(.green)
 //                                .dropDestination(for: Data.self) { items, location in

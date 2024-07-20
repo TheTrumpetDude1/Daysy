@@ -13,8 +13,6 @@ struct CreateIconView: View {
     
     var modifyCustomIcon: () -> Void
     
-    @StateObject private var audioRecorder = AudioRecorder()
-    
     @State private var orientation = UIDeviceOrientation.unknown
     @State private var lastOrientation = UIDeviceOrientation.unknown
     @Environment(\.presentationMode) var presentation
@@ -49,90 +47,90 @@ struct CreateIconView: View {
     var body: some View {
         VStack {
             if recordAudio {
-                VStack {
-                    Spacer()
-                    Text("this is where the visuals should go")
-                        .font(.system(size: horizontalSizeClass == .compact ? 25 : 50, weight: .medium,  design: .rounded))
-                    Spacer()
-                    HStack { //bottom row of buttons
-                        Button(action: {
-                            audioRecorder.deleteRecording()
-                            currAudioRecordingAddress = nil
-                            withAnimation(.snappy) {
-                                recordAudio.toggle()
-                            }
-                        }) {
-                            Image(systemName:"xmark.square.fill")
-                                .resizable()
-                                .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                                .foregroundStyle(.gray)
-                                .symbolRenderingMode(.hierarchical)
-                                .padding(horizontalSizeClass == .compact ? 0 : 5)
-                        }
-                        
-                        if audioRecorder.audioFilename != nil {
-                            Button(action: {
-                                if let savedFileName = audioRecorder.saveRecording() {
-                                    print("Recording saved with filename: \(savedFileName)")
-                                    currAudioRecordingAddress = savedFileName
-                                }
-                                withAnimation(.snappy) {
-                                    recordAudio.toggle()
-                                }
-                            }) {
-                                Image(systemName:"checkmark.square.fill")
-                                    .resizable()
-                                    .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
-                                    .foregroundStyle(.green)
-                                    .padding(horizontalSizeClass == .compact ? 0 : 5)
-                                
-                            }
-                        }
-                        Button(action: {
-                            if audioRecorder.isRecording {
-                                audioRecorder.stopRecording()
-                            } else {
-                                audioRecorder.startRecording()
-                            }
-                        }) {
-                            if audioRecorder.isRecording {
-                                Image(systemName: "stop.circle")
-                                    .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
-                                    .symbolRenderingMode(.hierarchical)
-                                    .foregroundStyle(Color.accentColor)
-                            } else {
-                                Image(systemName: "record.circle")
-                                    .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
-                                    .symbolRenderingMode(.hierarchical)
-                                    .foregroundStyle(Color.accentColor)
-                            }
-                        }
-                        .padding(horizontalSizeClass == .compact ? 0 : 5)
-                        if audioRecorder.audioFilename != nil && !audioRecorder.isRecording {
-                            Button(action: {
-                                if audioRecorder.isPlaying {
-                                    audioRecorder.stopPlaying()
-                                } else {
-                                    audioRecorder.playRecording()
-                                }
-                            }) {
-                                if audioRecorder.isPlaying {
-                                    Image(systemName: "stop.circle.fill")
-                                        .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
-                                        .symbolRenderingMode(.hierarchical)
-                                        .foregroundStyle(Color.accentColor)
-                                } else {
-                                    Image(systemName: "play.circle.fill")
-                                        .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
-                                        .symbolRenderingMode(.hierarchical)
-                                        .foregroundStyle(Color.accentColor)
-                                }
-                            }
-                            .padding(horizontalSizeClass == .compact ? 0 : 5)
-                        }
-                    }
-                }
-                .transition(.movingParts.move(angle: .degrees(270)).combined(with: .opacity))
+//                VStack {
+//                    Spacer()
+//                    Text("this is where the visuals should go")
+//                        .font(.system(size: horizontalSizeClass == .compact ? 25 : 50, weight: .medium,  design: .rounded))
+//                    Spacer()
+//                    HStack { //bottom row of buttons
+//                        Button(action: {
+//                            audioRecorder.deleteRecording()
+//                            currAudioRecordingAddress = nil
+//                            withAnimation(.snappy) {
+//                                recordAudio.toggle()
+//                            }
+//                        }) {
+//                            Image(systemName:"xmark.square.fill")
+//                                .resizable()
+//                                .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+//                                .foregroundStyle(.gray)
+//                                .symbolRenderingMode(.hierarchical)
+//                                .padding(horizontalSizeClass == .compact ? 0 : 5)
+//                        }
+//                        
+//                        if audioRecorder.audioFilename != nil {
+//                            Button(action: {
+//                                if let savedFileName = audioRecorder.saveRecording() {
+//                                    print("Recording saved with filename: \(savedFileName)")
+//                                    currAudioRecordingAddress = savedFileName
+//                                }
+//                                withAnimation(.snappy) {
+//                                    recordAudio.toggle()
+//                                }
+//                            }) {
+//                                Image(systemName:"checkmark.square.fill")
+//                                    .resizable()
+//                                    .frame(width: horizontalSizeClass == .compact ? 75 : 100, height: horizontalSizeClass == .compact ? 75 : 100)
+//                                    .foregroundStyle(.green)
+//                                    .padding(horizontalSizeClass == .compact ? 0 : 5)
+//                                
+//                            }
+//                        }
+//                        Button(action: {
+//                            if audioRecorder.isRecording {
+//                                audioRecorder.stopRecording()
+//                            } else {
+//                                audioRecorder.startRecording()
+//                            }
+//                        }) {
+//                            if audioRecorder.isRecording {
+//                                Image(systemName: "stop.circle")
+//                                    .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
+//                                    .symbolRenderingMode(.hierarchical)
+//                                    .foregroundStyle(Color.accentColor)
+//                            } else {
+//                                Image(systemName: "record.circle")
+//                                    .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
+//                                    .symbolRenderingMode(.hierarchical)
+//                                    .foregroundStyle(Color.accentColor)
+//                            }
+//                        }
+//                        .padding(horizontalSizeClass == .compact ? 0 : 5)
+//                        if audioRecorder.audioFilename != nil && !audioRecorder.isRecording {
+//                            Button(action: {
+//                                if audioRecorder.isPlaying {
+//                                    audioRecorder.stopPlaying()
+//                                } else {
+//                                    audioRecorder.playRecording()
+//                                }
+//                            }) {
+//                                if audioRecorder.isPlaying {
+//                                    Image(systemName: "stop.circle.fill")
+//                                        .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
+//                                        .symbolRenderingMode(.hierarchical)
+//                                        .foregroundStyle(Color.accentColor)
+//                                } else {
+//                                    Image(systemName: "play.circle.fill")
+//                                        .font(.system(size: horizontalSizeClass == .compact ? 75 : 100, weight: .regular,  design: .rounded))
+//                                        .symbolRenderingMode(.hierarchical)
+//                                        .foregroundStyle(Color.accentColor)
+//                                }
+//                            }
+//                            .padding(horizontalSizeClass == .compact ? 0 : 5)
+//                        }s
+//                    }
+//                }
+//                .transition(.movingParts.move(angle: .degrees(270)).combined(with: .opacity))
             } else {
                 RoundedRectangle(cornerRadius: (lastOrientation.isLandscape && horizontalSizeClass != .compact) ? (isCustomTextFieldActive ? 25 : 50) : 50)
                     .stroke(Color.black, lineWidth: 5)
@@ -817,7 +815,7 @@ struct CreateIconView: View {
                 .ignoresSafeArea(.keyboard)
             }
         }
-        .onChange(of: isCustomTextFieldActive, perform: { _ in
+        .onChange(of: currCustomIconText, perform: { _ in
             if isCustomTextFieldActive && !currCustomIconText.isEmpty {
                 customizedText = true
             }

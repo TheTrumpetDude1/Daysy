@@ -14,15 +14,19 @@ import UniformTypeIdentifiers
 import AVFoundation
 import Supabase
 import Charts
+import SlideOverCard
 
 struct SupaTestView: View {
     
     //actual variables ------
     
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    
     @State var jsonAccounts: [JSONAccount] = []
     @State var accounts: [Account] = []
     @State var currError = ""
     @State var isLoading = true
+    @State var animate = false
     
     
     @State private var first_name: String = ""
@@ -32,8 +36,9 @@ struct SupaTestView: View {
     
     var body: some View {
         
-        
             Text("no")
+        
+
         
         /*
         VStack {

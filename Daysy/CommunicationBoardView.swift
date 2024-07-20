@@ -656,17 +656,10 @@ struct CommunicationBoardView: View {
                     HStack(alignment: .bottom) {
                         if (lockButtonsOn && !unlockButtons) || currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
                             if currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
-                                VStack {
-                                    Text("\(Image(systemName: "star.fill")) Most Used")
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.01)
-                                        .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
-                                    Text("This folder contains your most used icons across all of your Sheets and your Communication Board.")
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.01)
-                                        .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
-                                        .foregroundStyle(.gray)
-                                }
+                                Text("\(Image(systemName: "star.fill")) Most Used")
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.01)
+                                    .font(.system(size: horizontalSizeClass == .compact ? 30 : 50, weight: .bold, design: .rounded))
                             } else {
                                     Text(currFolderName)
                                         .lineLimit(1)
@@ -745,11 +738,19 @@ struct CommunicationBoardView: View {
                         }
                     }
                     if (lockButtonsOn && !unlockButtons) || currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
-                        Text(currFolderDescription)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.01)
-                            .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
-                            .foregroundStyle(.gray)
+                        if currFolderName == "\(Image(systemName: "star.fill")) Most Used" {
+                            Text("Your favorite icons.")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.01)
+                                .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
+                                .foregroundStyle(.gray)
+                        } else {
+                            Text(currFolderDescription)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.01)
+                                .font(.system(size: horizontalSizeClass == .compact ? 20 : 35, weight: .bold, design: .rounded))
+                                .foregroundStyle(.gray)
+                        }
                     } else {
                         TextField("Description...", text: $currFolderDescription, onEditingChanged: { editing in
                             
@@ -1573,7 +1574,7 @@ struct CommunicationBoardView: View {
                                                         .resizable()
                                                         .frame(width: 65, height: 65)
                                                         .foregroundStyle(.green)
-                                                    Text("\(Image(systemName: "plus.viewfinder"))")
+                                                    Text("\(Image(systemName: "plus"))")
                                                         .font(.system(size: 30))
                                                         .foregroundStyle(Color(.systemBackground))
                                                         .symbolRenderingMode(.hierarchical)
